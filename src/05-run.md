@@ -54,7 +54,7 @@ a `coroutine.status` that is not `"dead"`. If all `threads` are `"dead"` and not
 we exit the run loop. Next we update our `socketwrappermap` by looping over all of the values in `threadswaitingfor`
 and insert each `recvr` and `sendr` into the key of `skt.inner_sock`.
 
-With all the book keeping done, we run all of the `timers` that have reached their deadline, and update our
+With all the bookkeeping done, we run all of the `timers` that have reached their deadline, and update our
 local variable `timeout` to the duration until the shortest remaining timeout. If at least one thread was added to
 `readythreads`, we set our timeout to 0, because we already know we have new work to do. At this point if `timeout` is
 `nil` and both `sendt` and `recvt` are empty, we raise an error because we are about to call
@@ -90,7 +90,7 @@ With that complete, we now have a fully updated `readythreads` and we start the 
                1. This calls `os.exit(-1)`
    2. Else, print a warning message if printing is turned on
 5. Initialize a variable `running` to `false`
-6. Loop over all `threads`, if `coroutine.status` doesn't return "dead" for any, set `running` to `true`
+6. Loop over all `threads`, calling `coroutine.status` on each, if at least 1 doesn't return "dead", set `running` to `true`
 7. If `running` is `false` and `readythreads` is empty
    1. Exit the run loop
 8. Loop over all the values in `threadswaitingfor`
@@ -125,7 +125,7 @@ The first associated function worth discussing is `timers.set`, which takes the 
 `callback: fun()` and `ref: table`. When called, we first capture the current timestamp via `socket.gettime()`,
 we then calculate the deadline for this timer by adding `timeout` to that timestamps into a variable `timeoutat`.
 We then `table.insert` the the table `{ timeoutat = timeoutat, callback = callback, ref = ref }` into `timeouts`.
-If `ref` isn't `nil` we also populated `refs[ref]` with that same table.
+If `ref` isn't `nil` we also populate `refs[ref]` with that same table.
 
 Next up is `timers.cancel` which takes the arguments `ref: table`. When called, we first lookup the timeout info
 from `refs[ref]`, if we find something there we remove the values in the properties `callback` and `ref` and finally
