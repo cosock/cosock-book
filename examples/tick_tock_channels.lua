@@ -26,7 +26,7 @@ end)
 cosock.spawn(function()
   task(tick_tx, tock_rx, "tock")
 end)
--- prime the tick task tp start first
+-- prime the tick task to start first
 tick_tx:send()
 
 cosock.run()
