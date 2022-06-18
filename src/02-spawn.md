@@ -15,6 +15,8 @@ The act of calling `cosock.spawn` allows us to use the non-blocking `cosock.sock
 we could extend our application to not only print this message every second but use the time this coroutine
 is sleeping to perform some other work. Let's extend our little example a bit.
 
+<span id="ticktock-example"></span>
+
 ```lua
 {{#include ../examples/less_basic_spawn.lua}}
 ```
