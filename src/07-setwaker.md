@@ -21,7 +21,7 @@ seconds we want to wait for. Finally, we define `Timer:wait` which is where our 
 This method calls `coroutine.yield`, with 3 arguments `{self}`, an empty table, and `self.secs`.
 These arguments match exactly what would be passed to `socket.select`, the first is a list of any
 receivers, the second is a list of any senders and finally the timeout. Since we pass `{self}` as the
-first argument that means we are treating `Timer` as a receiver. ultimately what we are doing here
+first argument that means we are treating `Timer` as a receiver. Ultimately what we are doing here
 is asking `cosock` to call `socket.select({self}, {}, self.secs)`. While we don't end up calling `self.waker`
 ourselves, cosock uses `setwaker` to register tasks to be resumed so we need to conform to that. Just to
 illustrate that is happening, a `print` statement has been added to `setwaker`, if we run this
