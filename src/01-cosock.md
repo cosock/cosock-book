@@ -35,7 +35,3 @@ Notice that we called [`cosock.spawn`](~/02-spawn.html) twice, once for the serv
 once for the client task, we are going to dig into that next. We also added a call to `cosock.run`
 at the bottom of our example, this function will run our tasks until there is no more work to do
 so it is important you don't forget it or nothing will happen.
-
-## Getting Started
-
-The easiest way to use `cosock` is to install it with [luarocks](https://luarocks.org).
