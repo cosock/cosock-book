@@ -95,6 +95,8 @@ handing control from task 1 to task 2 and back again in an infinite loop. In a m
 program, you might see any number of tasks, that need to be juggled. In our next example, we will
 extend the client/server example to handle any number of clients.
 
+<span id="clientsserver-example"></span>
+
 ```lua
 {{#include ../examples/clients_server.lua }}
 ```
