@@ -43,7 +43,7 @@ First, we've added a few helper functions to handle the different events in our 
 the first is for when a client connection is ready to receive `handle_recv` takes 2 arguments,
 `client` which is a `cosock.socket.tcp` that was returned from a call
 to `accept` and `clients` which is a table where the keys are `cosock.socket.tcp` clients
-and the values are `true`. We first call `client:recieve` to get the bytes from
+and the values are `true`. We first call `client:receive` to get the bytes from
 the client and if that returns a string that contains `"ping"` then we send our
 `"pong"` message. There are few places where this can go wrong, the call to `receive`
 could return `nil` and an error message or not `"ping"` or the call to `send` could
@@ -75,7 +75,7 @@ we add `server` into it. By only including `server` when `recvt` has fewer than
 With `recvt` defined we can finally call `cosock.socket.select`, we use `recvt` as
 the first argument, an empty table as the `sendt` argument and finally a timeout of 5 seconds.
 We assign the result of `select` into `recvr, _sendr, err`, we would expect that
-`recvr` would contain any of our `clients` that are ready to `recieve` and, if
+`recvr` would contain any of our `clients` that are ready to `receive` and, if
 we are below the limit, `server`. If `recvr` is `nil` we would expect `err` to be
 the string describing that error. If `err` is `"timeout"` then we exit our server
 task which should exit the application. If we don't have an `err` then we loop over
@@ -88,5 +88,5 @@ it now loops 10 times before exiting and closing the `client`.
 
 If we were to run this you would see each of the tasks spawn in a random order and
 the first 5 of those would begin sending their `"ping"` messages. Once 1 of them
-completes, we would accept the next connection but not beforethat point which means
+completes, we would accept the next connection but not before that point which means
 we have limited our total number of connected clients to 5!

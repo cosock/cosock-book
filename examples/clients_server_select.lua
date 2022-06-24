@@ -46,7 +46,7 @@ end
 function handle_accept(server, clients)
   local client, err = server:accept()
   if err and err ~= "timeout" then
-    error("Error in accept: " .. tostring(err))
+    error("error in accept: " .. tostring(err))
   end
   if client then
     clients[client] = true
