@@ -8,7 +8,7 @@ To review, any time `BoundedChannelSender:send` would `yield` we create a tempor
 to handle our `setwaker` calls and in `BoundedChannel:set_waker_sendr`
 we use that table as the key to `_wakers.sendr` to store/remove the `waker` function.
 
-In `BondedChannel:try_wake` we use the `next` function to choose which entry of `_wakers.sendr` to
+In `BoundedChannel:try_wake` we use the `next` function to choose which entry of `_wakers.sendr` to
 call. The `next` function will always return the "first" key/value pair but what does that mean,
 how can Lua tables be ordered? When a table is created, it is assigned a memory address, unique
 to that table, we can see what the address is by using the default `__tostring` metamethod.

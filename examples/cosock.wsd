@@ -1,0 +1,26 @@
+@startuml Client
+participant "server task" as s
+participant cosock as co
+participant "client task" as c
+
+co->c: resume
+c->co: channel:receive(yield)
+co->s: resume
+s->s: bind
+s->s: server:getsockname
+s->s: channel:send
+s->co: server:accept (yield)
+co->c: resume with port
+c->co: client:connect (yield)
+co->s: resume with client
+s->co: client:receive (yield)
+co->c: resume connected
+loop
+    c->c: client:send
+    c->co: client:receive (yield)
+    co->s: resume with ping
+    s->s: client:send
+    s->co: client:receive (yield)
+    co->c: resmume with pong
+end
+@enduml

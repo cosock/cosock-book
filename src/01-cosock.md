@@ -1,6 +1,7 @@
 # Cosock
 
-Cosock is a coroutine runtime written in pure Lua and based on the popular luasocket library.
+Cosock is a coroutine runtime written in pure Lua and based on the popular
+[luasocket](https://w3.impa.br/~diego/software/luasocket/reference.html) library.
 
 The goal of the project is to provide the same interfaces that luasocket provides but wrapped
 up in coroutines to allow for concurrent IO.

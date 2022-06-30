@@ -59,7 +59,7 @@ go wrong.
 In this example, we create one channel pair and spawn two tasks which both call `receive` on our
 channel and just before `run` we call `send`.  Since the choice for which task
 should run at which time is left entirely up to cosock, we can't say for sure which of these tasks
-will actually receive. It might print "task 1" then "task 2" or it might print them in the reverse. 
+will actually receive. It might print "task 1" or "task 2". 
 
 > In actuality, cosock assumes that `receive` will only ever be called from the same coroutine.
 > Calling `receive` in multiple coroutines will (eventually) raise in a error.

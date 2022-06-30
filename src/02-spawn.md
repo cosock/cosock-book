@@ -44,37 +44,7 @@ but is very similar to our tick/tock example.
 Instead of using `cosock.socket.sleep` to tell cosock we are waiting around for something, it uses
 the `receive` method on a `cosock.socket.tcp`. Let's break down what is happening in that example.
 
-```text
-   Server Task                  Cosock                   Client Task
-  ┌────────────────────────────┬──────┬─────────────────────────────┐
-  │                            │xxxxxx│                             │
-  │                            │xxxxxx│                             │
-  │                      resume│xxxxxx│resume                       │
-  │◄───────────────────────────┤xxxxxx├────────────────────────────►│
-  │                            │xxxxxx│                             │
-  │server:bind                 │xxxxxx│              channel:receive│
-  │server:getsockname          │xxxxxx│◄────────────────────────────┤
-  │channel:send                │xxxxxx│                        yield│
-  │server:accept               │xxxxxx│                             │
-  ├───────────────────────────►│xxxxxx│resume with port             │
-  │yield                       │xxxxxx├────────────────────────────►│
-  │          resume with client│xxxxxx│               client:connect│
-  │◄───────────────────────────┤xxxxxx│◄────────────────────────────┤
-  │                            │xxxxxx│                        yield│
-  │                            │xxxxxx│resume connected             │
-**│****************************│xxxxxx├────────────────────────────►│
-*L│client:receive              │xxxxxx│                             │
-*O├───────────────────────────►│xxxxxx│*****************************│**
-*O│yield                       │xxxxxx│                  client:send│L*
-*P│            resume with ping│xxxxxx│               client:receive│O*
-* │◄───────────────────────────┤xxxxxx│◄────────────────────────────┤O*
-* │                            │xxxxxx│                        yield│P*
-* │client:send                 │xxxxxx│resume with pong             │ *
-**│****************************│xxxxxx├────────────────────────────►│ *
-  │                            │xxxxxx│*****************************│**
-  └────────────────────────────┴──────┴─────────────────────────────┘
-
-```
+![diagram illustrating the flow of the example](../examples/Client.svg)
 
 To start, both tasks will be resumed which means that cosock has selected it to run, we can't say
 for sure which task will get resumed first which is why we used a `cosock.channel` to make the

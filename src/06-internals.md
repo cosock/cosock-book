@@ -30,7 +30,8 @@ or a function that returns a table, with the following properties.
 Let's use a few examples to go over each of these starting with the `input` property.
 
 The method `receive` on a luasocket takes 2 arguments, a pattern string or number indicating
-_how_ long to try and read for and an optional prefix to put at the front of what was received.
+_how_ many bytes to try and read for and an optional prefix to put at the front of what was
+received.
 
 
 ```lua
@@ -102,7 +103,7 @@ return values from our method. If we complete our example, this is where
 we would end up calling `table.concat(shared_buffer)` to add all
 the chunks together before returning. 
 
-Continuing to use `recieve` as an example, this is what the tranform
+Continuing to use `receive` as an example, this is what the transform
 argument might look like.
 
 ```lua
@@ -144,7 +145,7 @@ m.receive = builder("receive", function()
         -- only reduce remaining_recv if it is a number
         if remaining_recv then
           remaining_recv = remaining_recv - #full
-          -- returning the updated remaining recieve
+          -- returning the updated remaining receive
           return remaining_recv
         end
         -- otherwise we return the pattern provided to input
@@ -162,7 +163,7 @@ m.receive = builder("receive", function()
       if type(partial) == "string" and #partial > 0 then
         table.insert(shared_buffer, partial)
       end
-      -- concatinate all the strings together
+      -- concatenate all the strings together
       local all = table.concat(shared_buffer)
       if err then
         -- if ther was an error it should go in the 3rd return
@@ -179,26 +180,26 @@ end)
 ```
 
 With the arguments defined, we can now discuss the return value of `builder`
-which will be  a thrid function, this one being
+which will be a third function, this one being
 the method's implementation, its first argument is `self` and varargs
-are used to alow for any additional arguments. 
+are used to allow for any additional arguments.
 
 Let's pause here and go over this because 3 levels of functions can be
 a bit difficult to follow. Our goal here is to re-use as much as possible
 for each of the methods on a cosock socket and since yield -> retry loop is
 going to be a common pattern we can define all of that in 1 place. The key is
 that these methods are going to need to know about a few extra pieces which
-achieved by the fact that each function's arguments is available to the 
+is achieved by the fact that each function's arguments are available to the
 returned function.
 
-Which means that the `recieve` method would have the following environment.
+Which means that the `receive` method would have the following environment.
 
 ```lua
 local recvmethods = {
-  recieve = { timeout = true }
+  receive = { timeout = true }
 }
 local sendmethods = {}
-local method = "recieve"
+local method = "receive"
 local transformsrc = function() --[[see above]] end
 ```
 
@@ -207,18 +208,18 @@ First, we capture all of the varargs into a table named `inputparams`,
 if the transform object had an `input` property defined, we then overwrite
 the variable with `{input(table.unpack(inputparams))}`. Now that we have our
 inputs the way they need to be we begin a long-running `repeat`/`until`
-loop. 
+loop.
 
 At the top of the loop we call `self.inner_sock[method]`, `inner_sock` is
 the property name for the luasocket on all of the cosock sockets. If the
 first return from that function is `nil` we check to see if the second
-return value can be found in `recievemethods` or `sendmethods`,
+return value can be found in `receivemethods` or `sendmethods`,
 if so we know that we need to yield, so we check if `blocked`
 is defined and call that if it is, again overwriting `inputparams`
 with the return value.
 
 Now we determine what `kind` of yield we are going to do, if the second
-return was found in `recievemethods` it would be `"recvr"` if it was
+return was found in `receivemethods` it would be `"recvr"` if it was
 found in `sendmethods` it would be `"sendr"`. Now we set up our arguments
 for `coroutine.yield` putting `self` into `recvt` if our `kind` is `"recvr"`
 or into `sendt` if our `kind` is `"sendr"`. Now we can call `coroutine.yield(sendt, recvt, self.timeout)` assigning the returns there to `recvr, sendr, rterr`. If `rterr` is not `nil`, we are going to return early, if its
@@ -226,14 +227,14 @@ value matches the error from our method call (i.e. "timeout" for both) then
 we return the values from our call to that method.
 
 The last thing we do in this case before heading back to the top of the loop
-is to assert our kind and the result of `cosock.socket.select` match, meaning
-we don't have a `kind` of `recvr` and anything populated in the `sendr`
-variable and vice versa.
+is to assert our kind and the result of `cosock.socket.select` match, meaning we have
+a `kind` of `"sendr"`, the `sendr` variable is populated, and the `recvr` variable is unpopulated;
+or vice versa.
 
 ----
 
 If the first return argument to our method call was not `nil` then we
-can exit early tranforming the return value with `output` if that is
+can exit early transforming the return value with `output` if that is
 populated.
  
 The only other function provided by `cosock.socket.internals` is

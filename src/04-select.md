@@ -3,6 +3,7 @@
 Now that we have covered how to spawn and run coroutines using cosock, let's talk about how we
 could handle multiple IO sources in a single coroutine. For this kind of work, cosock provides
 `cosock.socket.select`, this function works in a very similar way to luasocket's `socket.select`,
+to call it would look something like `local recvr, sendr, err = cosock.socket.select(recvt, sendt, timeout)`
 its arguments are
 
 - `recvt`: This is a list of cosock sockets that are waiting to be ready to `receive`
@@ -27,9 +28,9 @@ Its return values are
 So, how would we use something like this? Let's consider our `clients_server.lua` example
 from the [spawn chapter](./02-spawn.md), where we called `cosock.spawn` every time a new
 client was `accept`ed, this works but we don't have much control over how many tasks we end
-up spawning. In large part, this is because we don't know how long each task will run. Ideally,
-we would be able to handle all of the client connections on the same task as the server and to
-do that, we can use `select`.
+up spawning. In large part, this is because we don't know how long each task will run. To achieve
+this, we would need to be able to handle all of the client connections on the same task as the
+server and to do that, we can use `select`.
 
 ```lua
 {{ #include ../examples/clients_server_select.lua }}
