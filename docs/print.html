@@ -202,7 +202,7 @@ cosock.spawn(function()
   local client = server:accept()
   while true do
     local request = assert(client:receive())
-    print(string.format(&quot;receieved %q&quot;, request))
+    print(string.format(&quot;received %q&quot;, request))
     assert(request == &quot;ping&quot;)
     print(&quot;sending pong&quot;)
     client:send(&quot;pong\n&quot;)
@@ -417,7 +417,7 @@ cosock.spawn(function()
     cosock.spawn(function()
       while true do
         local request = assert(client:receive())
-        print(string.format(&quot;receieved %q&quot;, request))
+        print(string.format(&quot;received %q&quot;, request))
         if request:match(&quot;ping&quot;) then
           print(&quot;sending pong&quot;)
           client:send(&quot;pong\n&quot;)
@@ -494,7 +494,7 @@ cosock.spawn(function()
   local client = server:accept()
   while true do
     local request = assert(client:receive())
-    print(string.format(&quot;receieved %q&quot;, request))
+    print(string.format(&quot;received %q&quot;, request))
     assert(request == &quot;ping&quot;)
     print(&quot;sending pong&quot;)
     client:send(&quot;pong\n&quot;)
@@ -562,7 +562,7 @@ end)
 cosock.spawn(function()
   task(tick_tx, tock_rx, &quot;tock&quot;)
 end)
--- prime the tick task tp start first
+-- prime the tick task to start first
 tick_tx:send()
 
 cosock.run()
@@ -702,9 +702,9 @@ local number_of_clients = 10
 --- have the same port number
 local port_tx, port_rx = cosock.channel.new()
 
---- Handle a client being ready to recieve
+--- Handle a client being ready to receive
 --- @param client cosock.socket.tcp
---- @return interger|nil @1 if successful
+--- @return integer|nil @1 if successful
 --- @return nil|string @nil if successful, error message if not
 function handle_recv(client, clients)
   local request, err = client:receive()
@@ -714,7 +714,7 @@ function handle_recv(client, clients)
     end
     return
   end
-  print(string.format(&quot;receieved %q&quot;, request))
+  print(string.format(&quot;received %q&quot;, request))
   if request:match(&quot;ping&quot;) then
     print(&quot;sending pong&quot;)
     local s, err = client:send(&quot;pong\n&quot;)
@@ -736,7 +736,7 @@ end
 function handle_accept(server, clients)
   local client, err = server:accept()
   if err and err ~= &quot;timeout&quot; then
-    error(&quot;Error in accept: &quot; .. tostring(err))
+    error(&quot;error in accept: &quot; .. tostring(err))
   end
   if client then
     clients[client] = true
@@ -751,7 +751,6 @@ cosock.spawn(function()
   port_tx:send(p)
   server:listen()
   local clients = {}
-  handle_accept(server, clients)
   server:settimeout(0)
   while true do
     local recvt = {}
@@ -823,7 +822,7 @@ the total number of connections to 5, let's go over the changes.</p>
 the first is for when a client connection is ready to receive <code>handle_recv</code> takes 2 arguments,
 <code>client</code> which is a <code>cosock.socket.tcp</code> that was returned from a call
 to <code>accept</code> and <code>clients</code> which is a table where the keys are <code>cosock.socket.tcp</code> clients
-and the values are <code>true</code>. We first call <code>client:recieve</code> to get the bytes from
+and the values are <code>true</code>. We first call <code>client:receive</code> to get the bytes from
 the client and if that returns a string that contains <code>&quot;ping&quot;</code> then we send our
 <code>&quot;pong&quot;</code> message. There are few places where this can go wrong, the call to <code>receive</code>
 could return <code>nil</code> and an error message or not <code>&quot;ping&quot;</code> or the call to <code>send</code> could
@@ -851,7 +850,7 @@ we add <code>server</code> into it. By only including <code>server</code> when <
 <p>With <code>recvt</code> defined we can finally call <code>cosock.socket.select</code>, we use <code>recvt</code> as
 the first argument, an empty table as the <code>sendt</code> argument and finally a timeout of 5 seconds.
 We assign the result of <code>select</code> into <code>recvr, _sendr, err</code>, we would expect that
-<code>recvr</code> would contain any of our <code>clients</code> that are ready to <code>recieve</code> and, if
+<code>recvr</code> would contain any of our <code>clients</code> that are ready to <code>receive</code> and, if
 we are below the limit, <code>server</code>. If <code>recvr</code> is <code>nil</code> we would expect <code>err</code> to be
 the string describing that error. If <code>err</code> is <code>&quot;timeout&quot;</code> then we exit our server
 task which should exit the application. If we don't have an <code>err</code> then we loop over
@@ -862,7 +861,7 @@ the <code>clients</code> map to ensure that we service all of the client request
 it now loops 10 times before exiting and closing the <code>client</code>.</p>
 <p>If we were to run this you would see each of the tasks spawn in a random order and
 the first 5 of those would begin sending their <code>&quot;ping&quot;</code> messages. Once 1 of them
-completes, we would accept the next connection but not beforethat point which means
+completes, we would accept the next connection but not before that point which means
 we have limited our total number of connected clients to 5!</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="advanced-overview-of-cosockrun"><a class="header" href="#advanced-overview-of-cosockrun">Advanced Overview of <code>cosock.run</code></a></h1>
 <h2 id="global-variables"><a class="header" href="#global-variables">Global Variables</a></h2>
@@ -928,7 +927,7 @@ determine if we are still <code>running</code>, we do this by looping over all o
 a <code>coroutine.status</code> that is not <code>&quot;dead&quot;</code>. If all <code>threads</code> are <code>&quot;dead&quot;</code> and nothing got added to <code>readythreads</code> then
 we exit the run loop. Next we update our <code>socketwrappermap</code> by looping over all of the values in <code>threadswaitingfor</code>
 and insert each <code>recvr</code> and <code>sendr</code> into the key of <code>skt.inner_sock</code>.</p>
-<p>With all the book keeping done, we run all of the <code>timers</code> that have reached their deadline, and update our
+<p>With all the bookkeeping done, we run all of the <code>timers</code> that have reached their deadline, and update our
 local variable <code>timeout</code> to the duration until the shortest remaining timeout. If at least one thread was added to
 <code>readythreads</code>, we set our timeout to 0, because we already know we have new work to do. At this point if <code>timeout</code> is
 <code>nil</code> and both <code>sendt</code> and <code>recvt</code> are empty, we raise an error because we are about to call
@@ -986,7 +985,7 @@ or <code>&quot;timeout&quot;</code>, we loop over all of the values in <code>rec
 </ol>
 </li>
 <li>Initialize a variable <code>running</code> to <code>false</code></li>
-<li>Loop over all <code>threads</code>, if <code>coroutine.status</code> doesn't return &quot;dead&quot; for any, set <code>running</code> to <code>true</code></li>
+<li>Loop over all <code>threads</code>, calling <code>coroutine.status</code> on each, if at least 1 doesn't return &quot;dead&quot;, set <code>running</code> to <code>true</code></li>
 <li>If <code>running</code> is <code>false</code> and <code>readythreads</code> is empty
 <ol>
 <li>Exit the run loop</li>
@@ -1038,7 +1037,7 @@ has a few associated functions.</p>
 <code>callback: fun()</code> and <code>ref: table</code>. When called, we first capture the current timestamp via <code>socket.gettime()</code>,
 we then calculate the deadline for this timer by adding <code>timeout</code> to that timestamps into a variable <code>timeoutat</code>.
 We then <code>table.insert</code> the the table <code>{ timeoutat = timeoutat, callback = callback, ref = ref }</code> into <code>timeouts</code>.
-If <code>ref</code> isn't <code>nil</code> we also populated <code>refs[ref]</code> with that same table.</p>
+If <code>ref</code> isn't <code>nil</code> we also populate <code>refs[ref]</code> with that same table.</p>
 <p>Next up is <code>timers.cancel</code> which takes the arguments <code>ref: table</code>. When called, we first lookup the timeout info
 from <code>refs[ref]</code>, if we find something there we remove the values in the properties <code>callback</code> and <code>ref</code> and finally
 we remove the value from <code>refs</code>. By removing the <code>callback</code> we avoid ever calling the consequence of that timer.
@@ -1182,7 +1181,7 @@ table.insert(shared_buffer, chunk)
 return values from our method. If we complete our example, this is where
 we would end up calling <code>table.concat(shared_buffer)</code> to add all
 the chunks together before returning. </p>
-<p>Continuing to use <code>recieve</code> as an example, this is what the tranform
+<p>Continuing to use <code>receive</code> as an example, this is what the transform
 argument might look like.</p>
 <pre><code class="language-lua">local recvmethods = {
   receive = {timeout = true}
@@ -1222,7 +1221,7 @@ m.receive = builder(&quot;receive&quot;, function()
         -- only reduce remaining_recv if it is a number
         if remaining_recv then
           remaining_recv = remaining_recv - #full
-          -- returning the updated remaining recieve
+          -- returning the updated remaining receive
           return remaining_recv
         end
         -- otherwise we return the pattern provided to input
@@ -1240,7 +1239,7 @@ m.receive = builder(&quot;receive&quot;, function()
       if type(partial) == &quot;string&quot; and #partial &gt; 0 then
         table.insert(shared_buffer, partial)
       end
-      -- concatinate all the strings together
+      -- concatenate all the strings together
       local all = table.concat(shared_buffer)
       if err then
         -- if ther was an error it should go in the 3rd return
@@ -1256,39 +1255,39 @@ m.receive = builder(&quot;receive&quot;, function()
 end)
 </code></pre>
 <p>With the arguments defined, we can now discuss the return value of <code>builder</code>
-which will be  a thrid function, this one being
+which will be a third function, this one being
 the method's implementation, its first argument is <code>self</code> and varargs
-are used to alow for any additional arguments. </p>
+are used to allow for any additional arguments.</p>
 <p>Let's pause here and go over this because 3 levels of functions can be
 a bit difficult to follow. Our goal here is to re-use as much as possible
 for each of the methods on a cosock socket and since yield -&gt; retry loop is
 going to be a common pattern we can define all of that in 1 place. The key is
 that these methods are going to need to know about a few extra pieces which
-achieved by the fact that each function's arguments is available to the 
+is achieved by the fact that each function's arguments are available to the
 returned function.</p>
-<p>Which means that the <code>recieve</code> method would have the following environment.</p>
+<p>Which means that the <code>receive</code> method would have the following environment.</p>
 <pre><code class="language-lua">local recvmethods = {
-  recieve = { timeout = true }
+  receive = { timeout = true }
 }
 local sendmethods = {}
-local method = &quot;recieve&quot;
+local method = &quot;receive&quot;
 local transformsrc = function() --[[see above]] end
 </code></pre>
 <p>Now let's go over what actually happens in this shared method implementation.
 First, we capture all of the varargs into a table named <code>inputparams</code>,
-if the transform object had a <code>input</code> property defined, we then overwrite
+if the transform object had an <code>input</code> property defined, we then overwrite
 the variable with <code>{input(table.unpack(inputparams))}</code>. Now that we have our
 inputs the way they need to be we begin a long-running <code>repeat</code>/<code>until</code>
 loop. </p>
 <p>At the top of the loop we call <code>self.inner_sock[method]</code>, <code>inner_sock</code> is
 the property name for the luasocket on all of the cosock sockets. If the
 first return from that function is <code>nil</code> we check to see if the second
-return value can be found in <code>recievemethods</code> or <code>sendmethods</code>,
+return value can be found in <code>receivemethods</code> or <code>sendmethods</code>,
 if so we know that we need to yield, so we check if <code>blocked</code>
 is defined and call that if it is, again overwriting <code>inputparams</code>
-with the return value. </p>
+with the return value.</p>
 <p>Now we determine what <code>kind</code> of yield we are going to do, if the second
-return was found in <code>recievemethods</code> it would be <code>&quot;recvr&quot;</code> if it was
+return was found in <code>receivemethods</code> it would be <code>&quot;recvr&quot;</code> if it was
 found in <code>sendmethods</code> it would be <code>&quot;sendr&quot;</code>. Now we set up our arguments
 for <code>coroutine.yield</code> putting <code>self</code> into <code>recvt</code> if our <code>kind</code> is <code>&quot;recvr&quot;</code>
 or into <code>sendt</code> if our <code>kind</code> is <code>&quot;sendr&quot;</code>. Now we can call <code>coroutine.yield(sendt, recvt, self.timeout)</code> assigning the returns there to <code>recvr, sendr, rterr</code>. If <code>rterr</code> is not <code>nil</code>, we are going to return early, if its
@@ -1301,21 +1300,20 @@ variable and vice versa.</p>
 <hr />
 <p>If the first return argument to our method call was not <code>nil</code> then we
 can exit early tranforming the return value with <code>output</code> if that is
-populated.
-git 
-The only other function provided by <code>cosock.socket.internals</code> is 
+populated.</p>
+<p>The only other function provided by <code>cosock.socket.internals</code> is
 <code>setuprealsocketwaker</code> which completes the wrapping of our cosock socket.</p>
 <p>This function takes the socket table and an optional list of <code>kinds</code>, if
 <code>kinds</code> is not provided then the default will be both <code>sendr</code> and <code>recvr</code>.</p>
 <p>We then define a method on <code>socket</code> called <code>setwaker</code> which is used
-by cosock to wake up sleeping coroutines 
-(<a href="./07-setwaker.html">see the integrating chapter</a> for more info). 
+by cosock to wake up sleeping coroutines
+(<a href="./07-setwaker.html">see the integrating chapter</a> for more info).
 This <code>setwaker</code> will assign the provided <code>waker</code> function to
 a <code>self.wakers</code> table based on the <code>kind</code> of <code>waker</code>. It also defines
 a method <code>_wake</code> which takes an argument <code>kind</code> and varargs for any
 additional arguments. This method will see if <code>self.wakers[kind]</code> is
 not <code>nil</code> and if so call that with the varargs. It then replaces
-<code>self.wakers[kind]</code> with <code>nil</code>. </p>
+<code>self.wakers[kind]</code> with <code>nil</code>.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="integrating-with-cosock"><a class="header" href="#integrating-with-cosock">Integrating with Cosock</a></h1>
 <p>So far we have covered what cosock provides but what if we want to integrate our
 own libraries directly into cosock, what would that look like?</p>
@@ -1368,7 +1366,7 @@ seconds we want to wait for. Finally, we define <code>Timer:wait</code> which is
 This method calls <code>coroutine.yield</code>, with 3 arguments <code>{self}</code>, an empty table, and <code>self.secs</code>.
 These arguments match exactly what would be passed to <code>socket.select</code>, the first is a list of any
 receivers, the second is a list of any senders and finally the timeout. Since we pass <code>{self}</code> as the
-first argument that means we are treating <code>Timer</code> as a receiver. ultimately what we are doing here
+first argument that means we are treating <code>Timer</code> as a receiver. Ultimately what we are doing here
 is asking <code>cosock</code> to call <code>socket.select({self}, {}, self.secs)</code>. While we don't end up calling <code>self.waker</code>
 ourselves, cosock uses <code>setwaker</code> to register tasks to be resumed so we need to conform to that. Just to
 illustrate that is happening, a <code>print</code> statement has been added to <code>setwaker</code>, if we run this
@@ -1655,7 +1653,7 @@ means we have yielded for <code>self.timeout</code>.</p>
 bargain, so let's define a <code>closed</code> method.</p>
 <pre><code class="language-lua">function BoundedChannelReceiver:close()
   self._link:close()
-  --- If anytihing is waiting to send, it should wake up with an error
+  --- If anything is waiting to send, it should wake up with an error
   self._link:try_wake(&quot;sendr&quot;)
 end
 </code></pre>
@@ -1904,7 +1902,17 @@ table would look something like this.</p>
 The key issue here is that `next` will return the `waker` associated to the `wake_t` that has
 the lowest memory address meaning we could potentially end up starving one of our senders if
 our queue is full more than it is not. For example. -->
-<pre><code class="language-lua">{{#include ../../examples/table_key_order.lua}}
+<pre><code class="language-lua">local tables = {}
+for i=1, 10 do
+  tables[{}] = i
+end
+
+for i=1, 10 do
+  local t, v = next(tables)
+  local tp = tonumber(tostring(t):match(&quot;table: 0x(.+)&quot;), 16)
+  print(tp, v)
+  tables[t] = nil
+end
 </code></pre>
 <p>This example will create a table <code>tables</code> then loop 10 times assigning <code>tables[{}]</code> with <code>i</code>.
 In a second loop to 10, we use the <code>next</code> function to pull the &quot;first&quot; key/value pair from
@@ -1946,7 +1954,62 @@ It could starve other coroutines from being able to <code>send</code>.</p>
 and randomness does just that but that would require something like &quot;a normalized distribution&quot;
 which would mean it would take a very long time to see the same order. Let's see how random our
 temporary table keys are.</p>
-<pre><code class="language-lua">{{#include ../../examples/table_key_order_a_lot.lua}}
+<pre><code class="language-lua">local m = {
+  sets = {}
+}
+
+local table_size = 9
+
+function m:add_set(set)
+  for idx, existing in ipairs(self.sets) do
+    local exact_match = false
+    local left_t, left_v, right_t, right_v
+    for i=1,table_size do
+      left_t, left_v = next(set, left_t)
+      right_t, right_v = next(existing, right_t)
+      exact_match = left_v == right_v
+      if not exact_match then
+        break
+      end
+    end
+    
+    if exact_match then
+      table.insert(self.sets, set)
+      return {
+        first = existing,
+        first_idx = idx,
+        second = set,
+        second_idx = #self.sets
+      }
+    end
+  end
+  table.insert(self.sets, set)
+end
+
+local function gen_set()
+  local tables = {}
+  for i=1, table_size do
+    tables[{}] = i
+  end
+  return tables
+end
+
+local result
+
+repeat
+  result = m:add_set(gen_set())
+until result
+
+print(&quot;RESULT&quot;)
+print(result.first_idx, result.second_idx)
+print(&quot;f,s&quot;)
+for i=1,table_size do
+  local t1, v1 = next(result.first)
+  local t2, v2 = next(result.second)
+  print(string.format(&quot;%s,%s&quot;, v1, v2))
+  result.first[t1] = nil
+  result.second[t2] = nil
+end
 </code></pre>
 <p>Here we have extended our example to allow for repeating the creation of <code>tables</code> and then checking
 to see if the new version matches any of the previous versions. We reduced the number of entries

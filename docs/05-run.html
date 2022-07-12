@@ -206,7 +206,7 @@ determine if we are still <code>running</code>, we do this by looping over all o
 a <code>coroutine.status</code> that is not <code>&quot;dead&quot;</code>. If all <code>threads</code> are <code>&quot;dead&quot;</code> and nothing got added to <code>readythreads</code> then
 we exit the run loop. Next we update our <code>socketwrappermap</code> by looping over all of the values in <code>threadswaitingfor</code>
 and insert each <code>recvr</code> and <code>sendr</code> into the key of <code>skt.inner_sock</code>.</p>
-<p>With all the book keeping done, we run all of the <code>timers</code> that have reached their deadline, and update our
+<p>With all the bookkeeping done, we run all of the <code>timers</code> that have reached their deadline, and update our
 local variable <code>timeout</code> to the duration until the shortest remaining timeout. If at least one thread was added to
 <code>readythreads</code>, we set our timeout to 0, because we already know we have new work to do. At this point if <code>timeout</code> is
 <code>nil</code> and both <code>sendt</code> and <code>recvt</code> are empty, we raise an error because we are about to call
@@ -264,7 +264,7 @@ or <code>&quot;timeout&quot;</code>, we loop over all of the values in <code>rec
 </ol>
 </li>
 <li>Initialize a variable <code>running</code> to <code>false</code></li>
-<li>Loop over all <code>threads</code>, if <code>coroutine.status</code> doesn't return &quot;dead&quot; for any, set <code>running</code> to <code>true</code></li>
+<li>Loop over all <code>threads</code>, calling <code>coroutine.status</code> on each, if at least 1 doesn't return &quot;dead&quot;, set <code>running</code> to <code>true</code></li>
 <li>If <code>running</code> is <code>false</code> and <code>readythreads</code> is empty
 <ol>
 <li>Exit the run loop</li>
@@ -316,7 +316,7 @@ has a few associated functions.</p>
 <code>callback: fun()</code> and <code>ref: table</code>. When called, we first capture the current timestamp via <code>socket.gettime()</code>,
 we then calculate the deadline for this timer by adding <code>timeout</code> to that timestamps into a variable <code>timeoutat</code>.
 We then <code>table.insert</code> the the table <code>{ timeoutat = timeoutat, callback = callback, ref = ref }</code> into <code>timeouts</code>.
-If <code>ref</code> isn't <code>nil</code> we also populated <code>refs[ref]</code> with that same table.</p>
+If <code>ref</code> isn't <code>nil</code> we also populate <code>refs[ref]</code> with that same table.</p>
 <p>Next up is <code>timers.cancel</code> which takes the arguments <code>ref: table</code>. When called, we first lookup the timeout info
 from <code>refs[ref]</code>, if we find something there we remove the values in the properties <code>callback</code> and <code>ref</code> and finally
 we remove the value from <code>refs</code>. By removing the <code>callback</code> we avoid ever calling the consequence of that timer.

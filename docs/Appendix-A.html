@@ -168,7 +168,17 @@ table would look something like this.</p>
 The key issue here is that `next` will return the `waker` associated to the `wake_t` that has
 the lowest memory address meaning we could potentially end up starving one of our senders if
 our queue is full more than it is not. For example. -->
-<pre><code class="language-lua">{{#include ../../examples/table_key_order.lua}}
+<pre><code class="language-lua">local tables = {}
+for i=1, 10 do
+  tables[{}] = i
+end
+
+for i=1, 10 do
+  local t, v = next(tables)
+  local tp = tonumber(tostring(t):match(&quot;table: 0x(.+)&quot;), 16)
+  print(tp, v)
+  tables[t] = nil
+end
 </code></pre>
 <p>This example will create a table <code>tables</code> then loop 10 times assigning <code>tables[{}]</code> with <code>i</code>.
 In a second loop to 10, we use the <code>next</code> function to pull the &quot;first&quot; key/value pair from
@@ -210,7 +220,62 @@ It could starve other coroutines from being able to <code>send</code>.</p>
 and randomness does just that but that would require something like &quot;a normalized distribution&quot;
 which would mean it would take a very long time to see the same order. Let's see how random our
 temporary table keys are.</p>
-<pre><code class="language-lua">{{#include ../../examples/table_key_order_a_lot.lua}}
+<pre><code class="language-lua">local m = {
+  sets = {}
+}
+
+local table_size = 9
+
+function m:add_set(set)
+  for idx, existing in ipairs(self.sets) do
+    local exact_match = false
+    local left_t, left_v, right_t, right_v
+    for i=1,table_size do
+      left_t, left_v = next(set, left_t)
+      right_t, right_v = next(existing, right_t)
+      exact_match = left_v == right_v
+      if not exact_match then
+        break
+      end
+    end
+    
+    if exact_match then
+      table.insert(self.sets, set)
+      return {
+        first = existing,
+        first_idx = idx,
+        second = set,
+        second_idx = #self.sets
+      }
+    end
+  end
+  table.insert(self.sets, set)
+end
+
+local function gen_set()
+  local tables = {}
+  for i=1, table_size do
+    tables[{}] = i
+  end
+  return tables
+end
+
+local result
+
+repeat
+  result = m:add_set(gen_set())
+until result
+
+print(&quot;RESULT&quot;)
+print(result.first_idx, result.second_idx)
+print(&quot;f,s&quot;)
+for i=1,table_size do
+  local t1, v1 = next(result.first)
+  local t2, v2 = next(result.second)
+  print(string.format(&quot;%s,%s&quot;, v1, v2))
+  result.first[t1] = nil
+  result.second[t2] = nil
+end
 </code></pre>
 <p>Here we have extended our example to allow for repeating the creation of <code>tables</code> and then checking
 to see if the new version matches any of the previous versions. We reduced the number of entries

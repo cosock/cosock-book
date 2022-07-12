@@ -165,7 +165,7 @@ cosock.spawn(function()
   local client = server:accept()
   while true do
     local request = assert(client:receive())
-    print(string.format(&quot;receieved %q&quot;, request))
+    print(string.format(&quot;received %q&quot;, request))
     assert(request == &quot;ping&quot;)
     print(&quot;sending pong&quot;)
     client:send(&quot;pong\n&quot;)
@@ -233,7 +233,7 @@ end)
 cosock.spawn(function()
   task(tick_tx, tock_rx, &quot;tock&quot;)
 end)
--- prime the tick task tp start first
+-- prime the tick task to start first
 tick_tx:send()
 
 cosock.run()

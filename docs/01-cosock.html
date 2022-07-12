@@ -201,7 +201,7 @@ cosock.spawn(function()
   local client = server:accept()
   while true do
     local request = assert(client:receive())
-    print(string.format(&quot;receieved %q&quot;, request))
+    print(string.format(&quot;received %q&quot;, request))
     assert(request == &quot;ping&quot;)
     print(&quot;sending pong&quot;)
     client:send(&quot;pong\n&quot;)

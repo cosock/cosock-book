@@ -292,7 +292,7 @@ cosock.spawn(function()
     cosock.spawn(function()
       while true do
         local request = assert(client:receive())
-        print(string.format(&quot;receieved %q&quot;, request))
+        print(string.format(&quot;received %q&quot;, request))
         if request:match(&quot;ping&quot;) then
           print(&quot;sending pong&quot;)
           client:send(&quot;pong\n&quot;)

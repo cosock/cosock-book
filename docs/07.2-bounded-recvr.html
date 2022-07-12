@@ -215,7 +215,7 @@ means we have yielded for <code>self.timeout</code>.</p>
 bargain, so let's define a <code>closed</code> method.</p>
 <pre><code class="language-lua">function BoundedChannelReceiver:close()
   self._link:close()
-  --- If anytihing is waiting to send, it should wake up with an error
+  --- If anything is waiting to send, it should wake up with an error
   self._link:try_wake(&quot;sendr&quot;)
 end
 </code></pre>

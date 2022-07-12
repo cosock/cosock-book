@@ -194,9 +194,9 @@ local number_of_clients = 10
 --- have the same port number
 local port_tx, port_rx = cosock.channel.new()
 
---- Handle a client being ready to recieve
+--- Handle a client being ready to receive
 --- @param client cosock.socket.tcp
---- @return interger|nil @1 if successful
+--- @return integer|nil @1 if successful
 --- @return nil|string @nil if successful, error message if not
 function handle_recv(client, clients)
   local request, err = client:receive()
@@ -206,7 +206,7 @@ function handle_recv(client, clients)
     end
     return
   end
-  print(string.format(&quot;receieved %q&quot;, request))
+  print(string.format(&quot;received %q&quot;, request))
   if request:match(&quot;ping&quot;) then
     print(&quot;sending pong&quot;)
     local s, err = client:send(&quot;pong\n&quot;)
@@ -228,7 +228,7 @@ end
 function handle_accept(server, clients)
   local client, err = server:accept()
   if err and err ~= &quot;timeout&quot; then
-    error(&quot;Error in accept: &quot; .. tostring(err))
+    error(&quot;error in accept: &quot; .. tostring(err))
   end
   if client then
     clients[client] = true
@@ -243,7 +243,6 @@ cosock.spawn(function()
   port_tx:send(p)
   server:listen()
   local clients = {}
-  handle_accept(server, clients)
   server:settimeout(0)
   while true do
     local recvt = {}
@@ -315,7 +314,7 @@ the total number of connections to 5, let's go over the changes.</p>
 the first is for when a client connection is ready to receive <code>handle_recv</code> takes 2 arguments,
 <code>client</code> which is a <code>cosock.socket.tcp</code> that was returned from a call
 to <code>accept</code> and <code>clients</code> which is a table where the keys are <code>cosock.socket.tcp</code> clients
-and the values are <code>true</code>. We first call <code>client:recieve</code> to get the bytes from
+and the values are <code>true</code>. We first call <code>client:receive</code> to get the bytes from
 the client and if that returns a string that contains <code>&quot;ping&quot;</code> then we send our
 <code>&quot;pong&quot;</code> message. There are few places where this can go wrong, the call to <code>receive</code>
 could return <code>nil</code> and an error message or not <code>&quot;ping&quot;</code> or the call to <code>send</code> could
@@ -343,7 +342,7 @@ we add <code>server</code> into it. By only including <code>server</code> when <
 <p>With <code>recvt</code> defined we can finally call <code>cosock.socket.select</code>, we use <code>recvt</code> as
 the first argument, an empty table as the <code>sendt</code> argument and finally a timeout of 5 seconds.
 We assign the result of <code>select</code> into <code>recvr, _sendr, err</code>, we would expect that
-<code>recvr</code> would contain any of our <code>clients</code> that are ready to <code>recieve</code> and, if
+<code>recvr</code> would contain any of our <code>clients</code> that are ready to <code>receive</code> and, if
 we are below the limit, <code>server</code>. If <code>recvr</code> is <code>nil</code> we would expect <code>err</code> to be
 the string describing that error. If <code>err</code> is <code>&quot;timeout&quot;</code> then we exit our server
 task which should exit the application. If we don't have an <code>err</code> then we loop over
@@ -354,7 +353,7 @@ the <code>clients</code> map to ensure that we service all of the client request
 it now loops 10 times before exiting and closing the <code>client</code>.</p>
 <p>If we were to run this you would see each of the tasks spawn in a random order and
 the first 5 of those would begin sending their <code>&quot;ping&quot;</code> messages. Once 1 of them
-completes, we would accept the next connection but not beforethat point which means
+completes, we would accept the next connection but not before that point which means
 we have limited our total number of connected clients to 5!</p>
 
                     </main>

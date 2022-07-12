@@ -194,7 +194,7 @@ seconds we want to wait for. Finally, we define <code>Timer:wait</code> which is
 This method calls <code>coroutine.yield</code>, with 3 arguments <code>{self}</code>, an empty table, and <code>self.secs</code>.
 These arguments match exactly what would be passed to <code>socket.select</code>, the first is a list of any
 receivers, the second is a list of any senders and finally the timeout. Since we pass <code>{self}</code> as the
-first argument that means we are treating <code>Timer</code> as a receiver. ultimately what we are doing here
+first argument that means we are treating <code>Timer</code> as a receiver. Ultimately what we are doing here
 is asking <code>cosock</code> to call <code>socket.select({self}, {}, self.secs)</code>. While we don't end up calling <code>self.waker</code>
 ourselves, cosock uses <code>setwaker</code> to register tasks to be resumed so we need to conform to that. Just to
 illustrate that is happening, a <code>print</code> statement has been added to <code>setwaker</code>, if we run this
