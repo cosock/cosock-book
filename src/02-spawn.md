@@ -1,6 +1,6 @@
 # Spawn
 
-At the core of cosock's ability to work is the ability to wrap any operation in a coroutine and
+At the core of cosock is the ability to wrap any operation in a coroutine and
 register that with cosock. For this cosock exports the function `cosock.spawn`. This function takes
 2 arguments, the first is a function that will be our coroutine, and the second is a name for that coroutine.
 
