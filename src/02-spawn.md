@@ -44,7 +44,7 @@ but is very similar to our tick/tock example.
 Instead of using `cosock.socket.sleep` to tell cosock we are waiting around for something, it uses
 the `receive` method on a `cosock.socket.tcp`. Let's break down what is happening in that example.
 
-![diagram illustrating the flow of the example](../examples/Client.svg)
+<img src="img/Client.svg" />
 
 To start, both tasks will be resumed which means that cosock has selected it to run, we can't say
 for sure which task will get resumed first which is why we used a `cosock.channel` to make the
