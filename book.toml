@@ -7,3 +7,7 @@ title = "Cosock"
 
 [build]
 build-dir = "docs"
+
+[output.html]
+git-repository-url = "https://github.com/cosock/cosock-book"
+edit-url-template = "https://github.com/cosock/cosock-book/edit/main/{path}"
