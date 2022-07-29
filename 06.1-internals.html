@@ -1,0 +1,409 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Internals - Cosock</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="01-cosock.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="01.1-getting-started.html"><strong aria-hidden="true">1.1.</strong> Getting Started</a></li></ol></li><li class="chapter-item expanded "><a href="02-spawn.html"><strong aria-hidden="true">2.</strong> Spawn</a></li><li class="chapter-item expanded "><a href="03-channels.html"><strong aria-hidden="true">3.</strong> Channels</a></li><li class="chapter-item expanded "><a href="04-select.html"><strong aria-hidden="true">4.</strong> Select</a></li><li class="chapter-item expanded "><a href="05.0-setwaker.html"><strong aria-hidden="true">5.</strong> Integrating with Cosock</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="05.1-bounded-channel.html"><strong aria-hidden="true">5.1.</strong> Bounded Channel: Shared</a></li><li class="chapter-item expanded "><a href="05.2-bounded-recvr.html"><strong aria-hidden="true">5.2.</strong> Bounded Channel: Recvr</a></li><li class="chapter-item expanded "><a href="05.3-bounded-sendr.html"><strong aria-hidden="true">5.3.</strong> Bounded Channel: Sendr</a></li><li class="chapter-item expanded "><a href="05.4-bounded-final.html"><strong aria-hidden="true">5.4.</strong> Bounded Channel: Finish</a></li><li class="chapter-item expanded "><a href="05.5-bounded-limits.html"><strong aria-hidden="true">5.5.</strong> Bounded Channel: Limitations</a></li></ol></li><li class="chapter-item expanded "><a href="06.0-advanced.html"><strong aria-hidden="true">6.</strong> Advanced</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="06.1-internals.html" class="active"><strong aria-hidden="true">6.1.</strong> Internals</a></li><li class="chapter-item expanded "><a href="06.2-run.html"><strong aria-hidden="true">6.2.</strong> Run</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Cosock</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/cosock/cosock-book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/cosock/cosock-book/edit/main/src/06.1-internals.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="internals"><a class="header" href="#internals">Internals</a></h1>
+<p>The module <code>cosock.socket.internals</code> is where luasocket gets wrapped into a &quot;cosock aware&quot;
+table. Initially, a call to <code>passthroughbuilder</code> is used to create a &quot;builder&quot; function.
+<code>passthroughbuilder</code> takes 2 arguments, <code>recvmethods</code> and <code>sendmethods</code> which are both
+a table where the keys are a method name and the values are a set-like table of
+error messages that it would be appropriate to <code>yield</code> for. A good example of one of these is
+the <code>tcp</code> module's <code>recvmethods</code>.</p>
+<pre><code class="language-lua">local recvmethods = {
+  receive = {timeout = true},
+  accept = {timeout = true},
+}
+</code></pre>
+<p>In both of the methods defined here, if we were to get the return value of <code>nil, &quot;timeout&quot;</code>
+would be a signal to call <code>coroutine.yield</code> and try again. The return value of
+<code>passthroughbuilder</code> is a function that we will call <code>builder</code>. <code>builder</code> takes 2 arguments
+<code>method</code> which is a string and an optional <code>transformsrc</code> which is a table,
+or a function that returns a table, with the following properties.</p>
+<ul>
+<li><code>input</code>: this is an optional function that takes the method inputs and returns those inputs
+potentially transformed.
+<ul>
+<li>This is only called once, just before we call the luasocket method for the first time</li>
+</ul>
+</li>
+<li><code>blocked</code>: this is an optional function that takes the return values from the method called
+and returns the input arguments to the next call of the same method</li>
+<li><code>output</code>: This is an optional function that will be called with the return values of the method
+<ul>
+<li>This is only called once, just before we return from the method</li>
+</ul>
+</li>
+</ul>
+<p>Let's use a few examples to go over each of these starting with the <code>input</code> property.</p>
+<p>The method <code>receive</code> on a luasocket takes 2 arguments, a pattern string or number indicating
+<em>how</em> many bytes to try and read for and an optional prefix to put at the front of what was
+received.</p>
+<pre><code class="language-lua">local socket = require &quot;luasocket&quot;
+local t = socket.tcp()
+t:connect(&quot;0.0.0.0&quot;, 8000)
+print(t:receive(&quot;*l&quot;, &quot;next line:&quot;))
+</code></pre>
+<p>Assuming that some server is listening on port 8080 of the machine we run this on, we would
+receive 1 line, for example, <code>&quot;ping\n&quot;</code> this would print <code>&quot;next line: ping&quot;</code>. As we will get
+into later, a call to cosock's <code>receive</code> may end up calling luasocket's <code>receive</code>
+until we get to a new line character. So what if our server sent 1 byte at a time? We would end
+up printing <code>&quot;next line: pnext line: inext line: nnext line: g&quot;</code> if we passed the second argument
+to the underlying luasocket. To avoid this we can use the <code>input</code> property to store this pattern
+and only add it once to the eventual return value.</p>
+<p>Now let's consider the <code>blocked</code> property, continuing to use <code>receive</code> as our example method,
+what happens if we call <code>t:receive(10)</code> and again our server returns 1 byte at at time?</p>
+<p>We can't call the underlying luasocket method with <code>10</code> over and over, that would result in us
+requesting too many bytes from the socket. Instead, we need a way to capture the partial value
+we received and reduce the number of bytes accordingly. Thankfully luasocket returns
+any partial data on error as the 3rd return argument so we could do something like</p>
+<pre><code class="language-lua">{
+  blocked = function(success, err, partial)
+    table.insert(shared_buffer, partial)
+    remaining_recv = remaining_recv - #partial
+    return remaining_recv 
+  end
+}
+</code></pre>
+<p>This example assumes that <code>shared_buffer</code> and <code>remaining_recv</code> exist <em>somewhere</em> but
+you can see that we are appropriately reducing the number of bytes we return here. This
+will eventually be the argument provided to the next call to the luasocket method.
+Here is a longer-form example of how a response of 1 byte at a time would look for our
+luasocket.</p>
+<pre><code class="language-lua">local shared_buffer = {}
+local remaining_recv = 5
+--p
+local _, err, chunk = t:receive(remaining_recv)
+remaining_recv = remaining_recv - #chunk
+table.insert(shared_buffer, chunk)
+--i
+err, chunk = t:receive(remaining_recv) --i
+remaining_recv = remaining_recv - #chunk
+table.insert(shared_buffer, chunk)
+--n
+err, chunk = t:receive(remaining_recv) --n
+remaining_recv = remaining_recv - #chunk
+table.insert(shared_buffer, chunk)
+--g
+err, chunk = t:receive(remaining_recv) --g
+remaining_recv = remaining_recv - #chunk
+table.insert(shared_buffer, chunk)
+--\n
+err, chunk = t:receive(remaining_recv) --\n
+remaining_recv = remaining_recv - #chunk
+table.insert(shared_buffer, chunk)
+</code></pre>
+<p>Finally we have the <code>output</code> property which gets called with the last
+return values from our method. If we complete our example, this is where
+we would end up calling <code>table.concat(shared_buffer)</code> to add all
+the chunks together before returning. </p>
+<p>Continuing to use <code>receive</code> as an example, this is what the transform
+argument might look like.</p>
+<pre><code class="language-lua">local recvmethods = {
+  receive = {timeout = true}
+}
+local sendmethods = {}
+-- First we define a builder injecting the method&lt;-&gt;error message maps
+local builder = passthroughbuilder(recvmethods, sendmethods)
+-- Now we can use the builder to define a method that doesn't do any
+-- transformations
+m.bind = builder(&quot;bind&quot;)
+-- Here we define a method that performs some transformations
+m.receive = builder(&quot;receive&quot;, function()
+  local shared_buffer = {}
+  local remaining_recv
+  local pattern
+  return {
+    input = function(pat, prefix)
+      -- insert the prefix as the first part of our return
+      -- value if present
+      if prefix then
+        table.insert(shared_buffer, prefix)
+      end
+      if type(pat) == &quot;number&quot; then
+        -- we know how many bytes to wait for, set this
+        -- for use in blocked
+        remaining_recv = pat
+      else
+        -- store this for use in blocked
+        pattern = pat
+      end
+      -- return only pattern to avoid duplicate prefixes
+      return pattern
+    end,
+    blocked = function(_, err, partial)
+      if type(partial) == &quot;string&quot; and #partial &gt; 0 then
+        table.insert(shared_buffer, partial)
+        -- only reduce remaining_recv if it is a number
+        if remaining_recv then
+          remaining_recv = remaining_recv - #full
+          -- returning the updated remaining receive
+          return remaining_recv
+        end
+        -- otherwise we return the pattern provided to input
+        return pattern
+      end
+    end,
+    output = function(full, err, partial)
+      -- if the first return is a string with a length &gt; 0 then
+      -- add it to the buffer
+      if type(full) == &quot;string&quot; and #full &gt; 0 then
+        table.insert(shared_buffer, full)
+      end
+      -- if the third return is a string with a length &gt; 0 then
+      -- add it to the buffer
+      if type(partial) == &quot;string&quot; and #partial &gt; 0 then
+        table.insert(shared_buffer, partial)
+      end
+      -- concatenate all the strings together
+      local all = table.concat(shared_buffer)
+      if err then
+        -- if ther was an error it should go in the 3rd return
+        -- position
+        return nil, err, all
+      else
+        -- if not error then it should go in the 1st return
+        -- position
+        return all
+      end
+    end
+  }
+end)
+</code></pre>
+<p>With the arguments defined, we can now discuss the return value of <code>builder</code>
+which will be a third function, this one being
+the method's implementation, its first argument is <code>self</code> and varargs
+are used to allow for any additional arguments.</p>
+<p>Let's pause here and go over this because 3 levels of functions can be
+a bit difficult to follow. Our goal here is to re-use as much as possible
+for each of the methods on a cosock socket and since yield -&gt; retry loop is
+going to be a common pattern we can define all of that in 1 place. The key is
+that these methods are going to need to know about a few extra pieces which
+is achieved by the fact that each function's arguments are available to the
+returned function.</p>
+<p>Which means that the <code>receive</code> method would have the following environment.</p>
+<pre><code class="language-lua">local recvmethods = {
+  receive = { timeout = true }
+}
+local sendmethods = {}
+local method = &quot;receive&quot;
+local transformsrc = function() --[[see above]] end
+</code></pre>
+<p>Now let's go over what actually happens in this shared method implementation.
+First, we capture all of the varargs into a table named <code>inputparams</code>,
+if the transform object had an <code>input</code> property defined, we then overwrite
+the variable with <code>{input(table.unpack(inputparams))}</code>. Now that we have our
+inputs the way they need to be we begin a long-running <code>repeat</code>/<code>until</code>
+loop.</p>
+<p>At the top of the loop we call <code>self.inner_sock[method]</code>, <code>inner_sock</code> is
+the property name for the luasocket on all of the cosock sockets. If the
+first return from that function is <code>nil</code> we check to see if the second
+return value can be found in <code>receivemethods</code> or <code>sendmethods</code>,
+if so we know that we need to yield, so we check if <code>blocked</code>
+is defined and call that if it is, again overwriting <code>inputparams</code>
+with the return value.</p>
+<p>Now we determine what <code>kind</code> of yield we are going to do, if the second
+return was found in <code>receivemethods</code> it would be <code>&quot;recvr&quot;</code> if it was
+found in <code>sendmethods</code> it would be <code>&quot;sendr&quot;</code>. Now we set up our arguments
+for <code>coroutine.yield</code> putting <code>self</code> into <code>recvt</code> if our <code>kind</code> is <code>&quot;recvr&quot;</code>
+or into <code>sendt</code> if our <code>kind</code> is <code>&quot;sendr&quot;</code>. Now we can call <code>coroutine.yield(sendt, recvt, self.timeout)</code> assigning the returns there to <code>recvr, sendr, rterr</code>. If <code>rterr</code> is not <code>nil</code>, we are going to return early, if its
+value matches the error from our method call (i.e. &quot;timeout&quot; for both) then
+we return the values from our call to that method.</p>
+<p>The last thing we do in this case before heading back to the top of the loop
+is to assert our kind and the result of <code>cosock.socket.select</code> match, meaning we have
+a <code>kind</code> of <code>&quot;sendr&quot;</code>, the <code>sendr</code> variable is populated, and the <code>recvr</code> variable is unpopulated;
+or vice versa.</p>
+<hr />
+<p>If the first return argument to our method call was not <code>nil</code> then we
+can exit early transforming the return value with <code>output</code> if that is
+populated.</p>
+<p>The only other function provided by <code>cosock.socket.internals</code> is
+<code>setuprealsocketwaker</code> which completes the wrapping of our cosock socket.</p>
+<p>This function takes the socket table and an optional list of <code>kinds</code>, if
+<code>kinds</code> is not provided then the default will be both <code>sendr</code> and <code>recvr</code>.</p>
+<p>We then define a method on <code>socket</code> called <code>setwaker</code> which is used
+by cosock to wake up sleeping coroutines
+(<a href="./07-setwaker.html">see the integrating chapter</a> for more info).
+This <code>setwaker</code> will assign the provided <code>waker</code> function to
+a <code>self.wakers</code> table based on the <code>kind</code> of <code>waker</code>. It also defines
+a method <code>_wake</code> which takes an argument <code>kind</code> and varargs for any
+additional arguments. This method will see if <code>self.wakers[kind]</code> is
+not <code>nil</code> and if so call that with the varargs. It then replaces
+<code>self.wakers[kind]</code> with <code>nil</code>.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="06.0-advanced.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="06.2-run.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="06.0-advanced.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="06.2-run.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>

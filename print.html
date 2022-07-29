@@ -1,0 +1,1829 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Cosock</title>
+        <meta name="robots" content="noindex" />
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="01-cosock.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="01.1-getting-started.html"><strong aria-hidden="true">1.1.</strong> Getting Started</a></li></ol></li><li class="chapter-item expanded "><a href="02-spawn.html"><strong aria-hidden="true">2.</strong> Spawn</a></li><li class="chapter-item expanded "><a href="03-channels.html"><strong aria-hidden="true">3.</strong> Channels</a></li><li class="chapter-item expanded "><a href="04-select.html"><strong aria-hidden="true">4.</strong> Select</a></li><li class="chapter-item expanded "><a href="05.0-setwaker.html"><strong aria-hidden="true">5.</strong> Integrating with Cosock</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="05.1-bounded-channel.html"><strong aria-hidden="true">5.1.</strong> Bounded Channel: Shared</a></li><li class="chapter-item expanded "><a href="05.2-bounded-recvr.html"><strong aria-hidden="true">5.2.</strong> Bounded Channel: Recvr</a></li><li class="chapter-item expanded "><a href="05.3-bounded-sendr.html"><strong aria-hidden="true">5.3.</strong> Bounded Channel: Sendr</a></li><li class="chapter-item expanded "><a href="05.4-bounded-final.html"><strong aria-hidden="true">5.4.</strong> Bounded Channel: Finish</a></li><li class="chapter-item expanded "><a href="05.5-bounded-limits.html"><strong aria-hidden="true">5.5.</strong> Bounded Channel: Limitations</a></li></ol></li><li class="chapter-item expanded "><a href="06.0-advanced.html"><strong aria-hidden="true">6.</strong> Advanced</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="06.1-internals.html"><strong aria-hidden="true">6.1.</strong> Internals</a></li><li class="chapter-item expanded "><a href="06.2-run.html"><strong aria-hidden="true">6.2.</strong> Run</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Cosock</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/cosock/cosock-book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="cosock"><a class="header" href="#cosock">Cosock</a></h1>
+<p>Cosock is a coroutine runtime written in pure Lua and based on the popular
+<a href="https://w3.impa.br/%7Ediego/software/luasocket/reference.html">luasocket</a> library.</p>
+<p>The goal of the project is to provide the same interfaces that luasocket provides but wrapped
+up in coroutines to allow for concurrent IO.</p>
+<blockquote>
+<p>Note: these docs will use the term coroutine, task, and thread interchangeably to all mean
+a <a href="https://www.lua.org/pil/9.html">lua coroutine</a></p>
+</blockquote>
+<p>For example, the following 2 lua programs use luasocket to define a tcp client and server.</p>
+<pre><code class="language-lua">--client.lua
+local socket = require &quot;socket&quot;
+local client = socket.tcp()
+client:connect(&quot;0.0.0.0&quot;, 9999)
+while true do
+  print(&quot;sending ping&quot;)
+  client:send(&quot;ping\n&quot;)
+  local response = assert(client:receive())
+  assert(response == &quot;pong&quot;)
+end
+</code></pre>
+<pre><code class="language-lua">--server.lua
+local socket = require &quot;socket&quot;
+local server = socket.tcp()
+server:bind(&quot;0.0.0.0&quot;, 9999)
+server:listen()
+print(&quot;listening&quot;, server:getsockname())
+local client = server:accept()
+while true do    
+  local request = assert(client:receive())
+  assert(request == &quot;ping&quot;)
+  print(&quot;sending pong&quot;)
+  client:send(&quot;pong\n&quot;)
+end
+</code></pre>
+<p>If you were to run <code>lua ./server.lua</code> first and then run <code>lua ./client.lua</code> you should see each terminal print out
+their &quot;sending ...&quot; messages forever.</p>
+<p>Using cosock, we can actually write the same thing as a single application.</p>
+<p><span id="clientserver-example"></span></p>
+<pre><code class="language-lua">-- client_server.lua
+local cosock = require &quot;cosock&quot;
+local socket = require &quot;cosock.socket&quot;
+local ip = &quot;0.0.0.0&quot;
+local server = socket.tcp()
+--- Since the client and server are in the same application
+--- we can use an OS assigned port and share it across the
+--- two tasks, to coordinate the two tasks to start in the order
+--- we want, we can use a cosock channel to make sure both tasks
+--- have the same port number
+local port_tx, port_rx = cosock.channel.new()
+
+--- Spawn a task for handling the server side of the socket
+cosock.spawn(function()
+  server:bind(ip, 0)
+  local _ip, p = server:getsockname()
+  port_tx:send(p)
+  server:listen()
+  local client = server:accept()
+  while true do
+    local request = assert(client:receive())
+    print(string.format(&quot;received %q&quot;, request))
+    assert(request == &quot;ping&quot;)
+    print(&quot;sending pong&quot;)
+    client:send(&quot;pong\n&quot;)
+  end
+end, &quot;server task&quot;)
+
+--- Spawn a task for handling the client side of the socket
+cosock.spawn(function()
+  --- wait for the server to be ready.
+  local port = assert(port_rx:receive())
+  local client = socket.tcp()
+  client:connect(ip, port)
+  while true do    
+    print(&quot;sending ping&quot;)
+    client:send(&quot;ping\n&quot;)
+    local request = assert(client:receive())
+    assert(request == &quot;pong&quot;)
+  end
+end, &quot;client task&quot;)
+
+--- Finally we tell cosock to run our 2 coroutines until they are done
+--- which should be forever
+cosock.run()
+</code></pre>
+<p>Now if we run this with <code>lua ./client_server.lua</code> we should see the messages alternate.</p>
+<p>Notice that we called <a href="%7E/02-spawn.html"><code>cosock.spawn</code></a> twice, once for the server task and
+once for the client task, we are going to dig into that next. We also added a call to <code>cosock.run</code>
+at the bottom of our example, this function will run our tasks until there is no more work to do
+so it is important you don't forget it or nothing will happen.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="getting-started"><a class="header" href="#getting-started">Getting Started</a></h1>
+<p>The easiest way to use <code>cosock</code> is to install it with <a href="https://luarocks.org">luarocks</a>.</p>
+<pre><code class="language-sh">luarocks install cosock
+</code></pre>
+<p><code>cosock</code> depends on both <a href="https://github.com/lunarmodules/luasocket">luasocket</a>
+and <a href="https://github.com/brunoos/luasec">luasec</a>, when running the above command
+<code>luarocks</code> will attempt to compile both of these libraries which have some system
+dependencies.</p>
+<h2 id="luasocket"><a class="header" href="#luasocket">Luasocket</a></h2>
+<p>The version of <code>luasocket</code> we are using requires that the Lua development package is
+available.</p>
+<h3 id="linux"><a class="header" href="#linux">Linux</a></h3>
+<p>For Debian-based systems, you would need to run the following</p>
+<pre><code class="language-sh">sudo apt-get install liblua-dev
+</code></pre>
+<p>For Fedora</p>
+<pre><code class="language-sh">sudo dnf install lua-devel
+</code></pre>
+<h3 id="windows"><a class="header" href="#windows">Windows</a></h3>
+<p>Help Wanted: please open a <a href="https://github.com/cosock/cosock-book/pulls">PR with info here</a>
+if you have successfully got this working on windows.</p>
+<h3 id="macos"><a class="header" href="#macos">MacOS</a></h3>
+<p>These can be downloaded for MacOS via <code>brew</code></p>
+<pre><code class="language-sh">brew install lua
+</code></pre>
+<h2 id="luasec"><a class="header" href="#luasec">Luasec</a></h2>
+<p>Luasec depends on Openssl so you will need those development libraries</p>
+<h3 id="linux-1"><a class="header" href="#linux-1">Linux</a></h3>
+<p>For Debian-based systems, you would need to run the following</p>
+<pre><code class="language-sh">sudo apt-get install libssl-dev
+</code></pre>
+<p>For Fedora</p>
+<pre><code class="language-sh">sudo dnf install openssl-devel
+</code></pre>
+<h3 id="windows-1"><a class="header" href="#windows-1">Windows</a></h3>
+<p>Help Wanted: please open a <a href="https://github.com/cosock/cosock-book/pulls">PR with info here</a>
+if you have successfully got this working on windows.</p>
+<h3 id="macos-1"><a class="header" href="#macos-1">MacOS</a></h3>
+<p>These can be downloaded for MacOS via <code>brew</code></p>
+<pre><code class="language-sh">brew install openssl
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="spawn"><a class="header" href="#spawn">Spawn</a></h1>
+<p>At the core of cosock is the ability to wrap any operation in a coroutine and
+register that with cosock. For this cosock exports the function <code>cosock.spawn</code>. This function takes
+2 arguments, the first is a function that will be our coroutine, and the second is a name for that coroutine.</p>
+<p>For example, this is a simple program that will spawn a single coroutine, which will print the current
+timestamp and the word &quot;tick&quot; and then sleep for 1 second in a loop forever.</p>
+<pre><code class="language-lua">--basic_spawn.lua
+local cosock = require &quot;cosock&quot;
+
+cosock.spawn(function()
+  while true do
+    print(cosock.socket.gettime(), &quot;tick&quot;)
+    cosock.socket.sleep(1)
+  end
+end, &quot;clock&quot;)
+cosock.run()
+</code></pre>
+<p>The act of calling <code>cosock.spawn</code> allows us to use the non-blocking <code>cosock.socket.sleep</code> function. This means
+we could extend our application to not only print this message every second but use the time this coroutine
+is sleeping to perform some other work. Let's extend our little example a bit.</p>
+<p><span id="ticktock-example"></span></p>
+<pre><code class="language-lua">--less_basic_spawn.lua
+local cosock = require &quot;cosock&quot;
+
+local function tick_task()
+  while true do
+    print(cosock.socket.gettime(), &quot;tick&quot;)
+    cosock.socket.sleep(2)
+  end
+end
+
+local function tock_task()
+  cosock.socket.sleep(1)
+  while true do
+    print(cosock.socket.gettime(), &quot;tock&quot;)
+    cosock.socket.sleep(2)
+  end
+end
+
+cosock.spawn(tick_task, &quot;tick-task&quot;)
+cosock.spawn(tock_task, &quot;tock-task&quot;)
+cosock.run()
+</code></pre>
+<p>Very similar to our last example, this time we are spawning 2 coroutines one will print <code>&quot;tick&quot;</code> every two seconds
+the other will wait 1 second and then print <code>&quot;tock&quot;</code> every two seconds. This should result in a line getting
+printed to the terminal once a second alternating between our two strings. Notice though, there is a fair amount
+of code duplication as <code>tick_task</code> and <code>tock_task</code> are nearly identical. This is mostly driven by the fact
+that the first argument to <code>cosock.spawn</code> is a function that takes no arguments and returns no values which
+means we can't ask cosock to pass in any arguments. One way we can get around this is by using
+<a href="https://www.lua.org/pil/6.1.html">closures</a>. So instead of passing a function to
+<code>cosock.spawn</code> we can <em>return</em> a function from another function and use it as the argument to <code>cosock.spawn</code>.
+For example:</p>
+<pre><code class="language-lua">--even_less_basic_spawn.lua
+local cosock = require &quot;cosock&quot;
+
+local function create_task(name, should_sleep_first)
+  return function()
+    if should_sleep_first then
+      cosock.socket.sleep(1)
+    end
+    while true do
+      print(cosock.socket.gettime(), name)
+      cosock.socket.sleep(2)
+    end
+  end
+end
+
+cosock.spawn(create_task(&quot;tick&quot;, false), &quot;tick-task&quot;)
+cosock.spawn(create_task(&quot;tock&quot;, true), &quot;tock-task&quot;)
+cosock.run()
+</code></pre>
+<p>Notice here that <code>create_task</code> returns a function but takes a <code>name</code> argument and a <code>should_sleep_first</code>
+argument which are available to our returned function.</p>
+<p>Now, let's consider our <a href="%7E/../01-cosock.html#clientserver-example">first example</a> which may not look like it
+but is very similar to our tick/tock example.</p>
+<p>Instead of using <code>cosock.socket.sleep</code> to tell cosock we are waiting around for something, it uses
+the <code>receive</code> method on a <code>cosock.socket.tcp</code>. Let's break down what is happening in that example.</p>
+<img src="img/Client.svg" />
+<p>To start, both tasks will be resumed which means that cosock has selected it to run, we can't say
+for sure which task will get resumed first which is why we used a <code>cosock.channel</code> to make the
+client task wait until the server was ready. Shortly after resuming, each task eventually calls
+some method that will <code>yield</code> which means that it is waiting on <em>something</em> so cosock can run
+another task. For the server, the first time we <code>yield</code> is in a call to <code>accept</code>, if the client
+hasn't already called <code>connect</code> we would end up blocking so instead of blocking, we let another
+task work, when we finally have a client connected cosock will wake us back up again. On the
+client-side we first <code>yield</code> on a call to <code>channel:receive</code>, if the server hasn't sent the port
+number we would end up blocking that task from calling <code>bind</code> so we let the other task work until
+we finally have a port number and then cosock will wake us back up.</p>
+<p>This pattern continues, each task running exclusively until it needs to wait for something yielding
+control back to cosock. When the thing we were waiting for is ready, we can continue running again.</p>
+<p>In both our tick/tock examples and our client/server example, we reach a point where cosock is just
+handing control from task 1 to task 2 and back again in an infinite loop. In a more real-world
+program, you might see any number of tasks, that need to be juggled. In our next example, we will
+extend the client/server example to handle any number of clients.</p>
+<p><span id="clientsserver-example"></span></p>
+<pre><code class="language-lua">-- clients_server.lua
+local cosock = require &quot;cosock&quot;
+local socket = require &quot;cosock.socket&quot;
+local ip = &quot;0.0.0.0&quot;
+local server = socket.tcp()
+
+local number_of_clients = 10
+
+--- Since the clients and server are in the same application
+--- we can use an OS assigned port and share it across the
+--- two tasks, to coordinate the two tasks to start in the order
+--- we want, we can use a cosock channel to make sure both tasks
+--- have the same port number
+local port_tx, port_rx = cosock.channel.new()
+
+--- Spawn a task for handling the server side of the socket
+cosock.spawn(function()
+  server:bind(ip, 0)
+  local _ip, p = server:getsockname()
+  port_tx:send(p)
+  server:listen()
+  while true do
+    local client = server:accept()
+    cosock.spawn(function()
+      while true do
+        local request = assert(client:receive())
+        print(string.format(&quot;received %q&quot;, request))
+        if request:match(&quot;ping&quot;) then
+          print(&quot;sending pong&quot;)
+          client:send(&quot;pong\n&quot;)
+        else
+          client:close()
+          break
+        end
+      end
+    end)
+  end
+end, &quot;server task&quot;)
+
+--- A single client task
+---@param id integer The task's identifier
+---@param port integer The server's port number
+local function spawn_client(id, port)
+  print(&quot;spawn_client&quot;, id, port)
+  local client = socket.tcp()
+  client:connect(ip, port)
+  while true do    
+    print(&quot;sending ping&quot;, id)
+    client:send(string.format(&quot;ping %s\n&quot;, id))
+    local request = assert(client:receive())
+    assert(request == &quot;pong&quot;)
+    socket.sleep(0.5)
+  end
+end
+
+--- Wait for the port from the server task and then
+--- spawn the `number_of_clients` client tasks
+local function spawn_clients()
+  local port = assert(port_rx:receive())
+  for i=1,number_of_clients do
+    cosock.spawn(function()
+      spawn_client(i, port)
+    end, string.format(&quot;client-task-%s&quot;, i))
+  end
+end
+
+--- Spawn a bunch of client tasks
+cosock.spawn(function()
+  spawn_clients()
+end, &quot;client task&quot;)
+
+--- Finally we tell cosock to run all our coroutines until they are done
+--- which should be forever
+cosock.run()
+</code></pre>
+<p>Surprisingly little has changed. First, we updated the socket task to call <code>accept</code> more than once
+and then pass the returned <code>client</code> into its own task to <code>receive</code>/<code>send</code> in a loop there.</p>
+<p>For the client-side, we broke the client <code>send</code>/<code>receive</code> loop into its own task and added
+a parent task to wait for the port number and then <code>cosock.spawn</code> a bunch of client tasks.</p>
+<p>If you were to run this example, you would see that the print statements end up in random order!</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="channels"><a class="header" href="#channels">Channels</a></h1>
+<p>Coordinating coroutines can be a huge pain, to ease this pain cosock offers a synchronization primitive
+called channels. A <code>cosock.channel</code> is a &quot;multiple producer single consumer&quot; message queue, this means you can
+have one coroutine own the receiving half of the queue and pass the sender out to however many
+coroutines you'd like. We've already seen how they are used, in our
+<a href="01-cosock.html#clientserver-example">first example</a>, we used a <code>cosock.channel</code> to coordinate which port
+the client should <code>connect</code> to. What if we wanted to re-write that example without using a channel, that might look
+something like this: </p>
+<pre><code class="language-lua">--client_server_no_channel.lua
+local cosock = require &quot;cosock&quot;
+local socket = require &quot;cosock.socket&quot;
+local ip = &quot;0.0.0.0&quot;
+local server = socket.tcp()
+local shared_port
+--- Spawn a task for handling the server side of the socket
+cosock.spawn(function()
+  server:bind(ip, 0)
+  local _ip, p = server:getsockname()
+  shared_port = p
+  server:listen()
+  local client = server:accept()
+  while true do
+    local request = assert(client:receive())
+    print(string.format(&quot;received %q&quot;, request))
+    assert(request == &quot;ping&quot;)
+    print(&quot;sending pong&quot;)
+    client:send(&quot;pong\n&quot;)
+  end
+end, &quot;server task&quot;)
+
+--- Spawn a task for handling the client side of the socket
+cosock.spawn(function()
+  --- wait for the server to be ready.
+  while shared_port == nil do
+    socket.sleep(1)
+  end
+  local client = socket.tcp()
+  client:connect(ip, shared_port)
+  while true do    
+    print(&quot;sending ping&quot;)
+    client:send(&quot;ping\n&quot;)
+    local request = assert(client:receive())
+    assert(request == &quot;pong&quot;)
+  end
+end, &quot;client task&quot;)
+
+--- Finally we tell cosock to run our 2 coroutines until they are done
+--- which should be forever
+cosock.run()
+</code></pre>
+<p>That update removed our channel in favor of polling that <code>shared_port ~= nil</code> once every second. This will
+absolutely work, however, we have introduced a race condition. What if we sleep for 1 full second <em>right before</em>
+the server is issued its port? That second would be wasted, we could have already been creating our client. 
+While the consequence in this example isn't dire, it does show that relying on shared mutable state without
+some way to synchronize it between tasks can be problematic. </p>
+<blockquote>
+<p>As a note, we could also solve this problem by having the server task spawn the client task but that wouldn't
+be nearly as interesting to our current subject.</p>
+</blockquote>
+<p>Another place we have seen that could benefit from a channel is our <a href="02-spawn.html#ticktock-example">tick/tock example</a>,
+in that example, we hard-coded the synchronization. The first task would print then sleep for 2 seconds and the second
+task would sleep for 1 second and <em>then</em> print and sleep for 2 seconds. Let's take a look at what that might have
+looked like if we had used channels.</p>
+<pre><code class="language-lua">--tick_tock_channels.lua
+local cosock = require &quot;cosock&quot;
+
+-- We create 2 pairs of channels so our two task can send messages
+-- back and forth
+local tick_tx, tick_rx = cosock.channel.new()
+local tock_tx, tock_rx = cosock.channel.new()
+
+local function task(tx, rx, name)
+  while true do
+    -- First wait for the other task to tell us it is done
+    rx:receive()
+    -- print our name
+    print(cosock.socket.gettime(), name)
+    -- sleep for 1 second
+    cosock.socket.sleep(1)
+    -- tell the other task we are done
+    tx:send()
+  end
+end
+-- spawn the task to print tick every two seconds
+cosock.spawn(function()
+  task(tock_tx, tick_rx, &quot;tick&quot;)
+end)
+-- spawn the task to print tock every 2 seconds
+cosock.spawn(function()
+  task(tick_tx, tock_rx, &quot;tock&quot;)
+end)
+-- prime the tick task to start first
+tick_tx:send()
+
+cosock.run()
+</code></pre>
+<p>In this version, we only have one definition for a task, looping forever, it will first wait to <code>receive</code> the signal,
+and then it prints its name, sleeps for 1 second and then sends the signal on to the next task. The key to 
+making this all work is that we need to kick the process off by telling one of the tasks to start. Since a
+channel allows for multiple senders, it is ok that we call <code>send</code> in more than one place.</p>
+<p>Now say we wanted to extend our little clock emulator to print <code>&quot;clack&quot;</code> every 60 seconds to simulate the
+minute hand moving. That might look something like this:</p>
+<pre><code class="language-lua">--tick_tock_clack.lua
+local cosock = require &quot;cosock&quot;
+
+-- We create 2 pairs of channels so our two task can send messages
+-- back and forth
+local tick_tx, tick_rx = cosock.channel.new()
+local tock_tx, tock_rx = cosock.channel.new()
+local clack_tx, clack_rx = cosock.channel.new()
+
+local function task(tx, rx, name)
+  while true do
+    -- First wait for the other task to tell us the count
+    local count =  rx:receive()
+    -- print our name
+    print(cosock.socket.gettime(), name)
+    -- sleep for 1 second
+    cosock.socket.sleep(1)
+    -- tell the other task we are done
+    if count &gt;= 59 then
+      clack_tx:send(0)
+    else 
+      tx:send(count + 1)
+    end
+  end
+end
+-- spawn the task to print tick every two seconds
+cosock.spawn(function()
+  task(tock_tx, tick_rx, &quot;tick&quot;)
+end)
+-- spawn the task to print tock every 2 seconds
+cosock.spawn(function()
+  task(tick_tx, tock_rx, &quot;tock&quot;)
+end)
+cosock.spawn(function()
+  task(tick_tx, clack_rx, &quot;clack&quot;)
+end)
+-- prime the tick task tp start first
+tick_tx:send(1)
+
+cosock.run()
+</code></pre>
+<p>Here we have updated the tasks to now share a counter across our channel. So at the 
+start of each loop iteration, we first get the current count from our other task. We again print our name
+and then sleep for 1 second but now if the count is &gt;= 59 we send the count of 0 to our <code>&quot;clack&quot;</code> task which
+will always then send a 1 to the <code>&quot;tick&quot;</code> task to start the whole process over again. Just to make sure it
+is clear, we can use the send half of the <code>&quot;tick&quot;</code> task's channel in 3 places, the main thread
+to &quot;prime&quot; the clock, the <code>&quot;tock&quot;</code> task and the <code>&quot;clack&quot;</code> task.</p>
+<p>It is very important that we don't try and use the receiving half of a channel in more than one
+task, that would lead to potentially unexpected behavior. Let's look at an example of how that might
+go wrong.</p>
+<pre><code class="language-lua">-- bad_news_channels.lua
+local cosock = require &quot;cosock&quot;
+
+local tx, rx = cosock.channel.new()
+
+cosock.spawn(function()
+  rx:receive()
+  print(&quot;task 1&quot;)
+end)
+
+cosock.spawn(function()
+  rx:receive()
+  print(&quot;task 2&quot;)
+end)
+
+tx:send()
+
+cosock.run()
+</code></pre>
+<p>In this example, we create one channel pair and spawn two tasks which both call <code>receive</code> on our
+channel and just before <code>run</code> we call <code>send</code>.  Since the choice for which task
+should run at which time is left entirely up to cosock, we can't say for sure which of these tasks
+will actually receive. It might print &quot;task 1&quot; or &quot;task 2&quot;. </p>
+<blockquote>
+<p>In actuality, cosock assumes that <code>receive</code> will only ever be called from the same coroutine.
+Calling <code>receive</code> in multiple coroutines will (eventually) raise in a error.</p>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="select"><a class="header" href="#select">Select</a></h1>
+<p>Now that we have covered how to spawn and run coroutines using cosock, let's talk about how we
+could handle multiple IO sources in a single coroutine. For this kind of work, cosock provides
+<code>cosock.socket.select</code>, this function works in a very similar way to luasocket's <code>socket.select</code>,
+to call it would look something like <code>local recvr, sendr, err = cosock.socket.select(recvt, sendt, timeout)</code>
+its arguments are</p>
+<ul>
+<li><code>recvt</code>: This is a list of cosock sockets that are waiting to be ready to <code>receive</code></li>
+<li><code>sendt</code>: This is a list of cosock sockets that are waiting to be ready to <code>send</code></li>
+<li><code>timeout</code>: This is the maximum amount of seconds to wait for one or more entries in <code>recvt</code> or <code>sendt</code> to be ready
+<ul>
+<li>If this value is <code>nil</code> or negative it will treat the timeout as infinity</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>Note: The list entries for <code>sendt</code> and <code>recvt</code> can be other &quot;cosock aware&quot; tables like the
+<a href="https://github.com/cosock/lustre">lustre WebSocket</a>, for specifics on how to make a table &quot;cosock aware&quot; 
+<a href="07-setwaker.html">see the chapter on it</a></p>
+</blockquote>
+<p>Its return values are</p>
+<ul>
+<li><code>recvr</code>: A list of ready receivers, any entry here should be free to call <code>receive</code> and
+immediately be ready</li>
+<li><code>sendr</code>: A list of ready senders, any entry here should be free to call <code>send</code> and immediately be
+ready</li>
+<li><code>err</code>: If this value is not <code>nil</code> it represents an error message
+<ul>
+<li>The most common error message here would be <code>&quot;timeout&quot;</code> if the <code>timeout</code> argument provided
+is not <code>nil</code> and positive</li>
+</ul>
+</li>
+</ul>
+<p>So, how would we use something like this? Let's consider our <code>clients_server.lua</code> example
+from the <a href="./02-spawn.html">spawn chapter</a>, where we called <code>cosock.spawn</code> every time a new
+client was <code>accept</code>ed, this works but we don't have much control over how many tasks we end
+up spawning. In large part, this is because we don't know how long each task will run. To achieve
+this, we would need to be able to handle all of the client connections on the same task as the
+server and to do that, we can use <code>select</code>.</p>
+<pre><code class="language-lua">-- clients_server_select.lua
+local cosock = require &quot;cosock&quot;
+local socket = require &quot;cosock.socket&quot;
+local ip = &quot;0.0.0.0&quot;
+
+local number_of_clients = 10
+
+--- Since the clients and server are in the same application
+--- we can use an OS assigned port and share it across the
+--- two tasks, to coordinate the two tasks to start in the order
+--- we want, we can use a cosock channel to make sure both tasks
+--- have the same port number
+local port_tx, port_rx = cosock.channel.new()
+
+--- Handle a client being ready to receive
+--- @param client cosock.socket.tcp
+--- @return integer|nil @1 if successful
+--- @return nil|string @nil if successful, error message if not
+function handle_recv(client, clients)
+  local request, err = client:receive()
+  if not request then
+    if err == &quot;closed&quot; then
+      clients[client] = nil
+    end
+    return
+  end
+  print(string.format(&quot;received %q&quot;, request))
+  if request:match(&quot;ping&quot;) then
+    print(&quot;sending pong&quot;)
+    local s, err = client:send(&quot;pong\n&quot;)
+    if err == &quot;closed&quot; then
+      clients[client] = nil
+    elseif err then
+      print(&quot;error in recv: &quot; .. tostring(err))
+    end
+  else
+    client:close()
+    clients[client] = nil
+  end
+end
+
+--- Handle a server being ready to accept
+--- @param server cosock.socket.tcp
+--- @return cosock.socket.tcp|nil
+--- @return nil|string @nil if successful, error message if not
+function handle_accept(server, clients)
+  local client, err = server:accept()
+  if err and err ~= &quot;timeout&quot; then
+    error(&quot;error in accept: &quot; .. tostring(err))
+  end
+  if client then
+    clients[client] = true
+  end
+end
+
+--- Spawn a task for handling the server side of the socket
+cosock.spawn(function()
+  local server = socket.tcp()
+  server:bind(ip, 0)
+  local _ip, p = server:getsockname()
+  port_tx:send(p)
+  server:listen()
+  local clients = {}
+  server:settimeout(0)
+  while true do
+    local recvt = {}
+    for client, _ in pairs(clients) do
+      table.insert(recvt, client)
+    end
+    if #recvt &lt; 5 then
+      table.insert(recvt, server)
+    end
+    local recvr, _sendr, err = cosock.socket.select(recvt, {}, 5)
+    if err == &quot;timeout&quot; then
+      return
+    elseif err then
+      error(&quot;Error in select: &quot;..tostring(err))
+    end
+
+    for _, sock in ipairs(recvr) do
+      if sock == server then
+        print(&quot;accepting new client&quot;)
+        handle_accept(server, clients)
+      elseif clients[sock] then
+        handle_recv(sock, clients)
+      end
+    end
+  end
+end, &quot;server task&quot;)
+
+--- A single client task
+---@param id integer The task's identifier
+---@param port integer The server's port number
+local function spawn_client(id, port)
+  print(&quot;spawn_client&quot;, id, port)
+  local client = socket.tcp()
+  client:connect(ip, port)
+  for _=1,10 do    
+    print(&quot;sending ping&quot;, id)
+    client:send(string.format(&quot;ping %s\n&quot;, id))
+    local request = assert(client:receive())
+    assert(request == &quot;pong&quot;)
+    socket.sleep(0.5)
+  end
+  client:close()
+end
+
+--- Wait for the port from the server task and then
+--- spawn the `number_of_clients` client tasks
+local function spawn_clients()
+  local port = assert(port_rx:receive())
+  for i=1,number_of_clients do
+    cosock.spawn(function()
+      spawn_client(i, port)
+    end, string.format(&quot;client-task-%s&quot;, i))
+  end
+end
+
+--- Spawn a bunch of client tasks
+cosock.spawn(function()
+  spawn_clients()
+end, &quot;clients task&quot;)
+
+--- Finally we tell cosock to run all our coroutines until they are done
+--- which should be forever
+cosock.run()
+</code></pre>
+<p>The above is an updated version of our
+<a href="./02-spawn.html#clientsserver-example">clients/server example</a> with some updates to limit
+the total number of connections to 5, let's go over the changes.</p>
+<p>First, we've added a few helper functions to handle the different events in our system,
+the first is for when a client connection is ready to receive <code>handle_recv</code> takes 2 arguments,
+<code>client</code> which is a <code>cosock.socket.tcp</code> that was returned from a call
+to <code>accept</code> and <code>clients</code> which is a table where the keys are <code>cosock.socket.tcp</code> clients
+and the values are <code>true</code>. We first call <code>client:receive</code> to get the bytes from
+the client and if that returns a string that contains <code>&quot;ping&quot;</code> then we send our
+<code>&quot;pong&quot;</code> message. There are few places where this can go wrong, the call to <code>receive</code>
+could return <code>nil</code> and an error message or not <code>&quot;ping&quot;</code> or the call to <code>send</code> could
+return <code>nil</code> and an error message; if the error message is <code>&quot;closed&quot;</code> or the request
+didn't contain <code>&quot;ping&quot;</code> then we want to remove <code>client</code> from <code>clients</code> and if it was
+the latter then we want to call <code>client:close</code>.</p>
+<p>Next up we have <code>handle_accept</code> this also takes 2 arguments <code>server</code> which is a 
+<code>cosock.socket.tcp</code> socket that is listening and the same map of <code>clients</code>. If a
+call to <code>accept</code> returns a <code>client</code> then we add that <code>client</code> into our <code>clients</code> map.
+If <code>accept</code> returns <code>nil</code> and <code>err</code> isn't <code>&quot;timeout&quot;</code> then we raise an error.</p>
+<p>Alright, with these two helper functions we can now update the <code>&quot;server&quot;</code> task to
+handle all of the connected clients w/o having to call <code>spawn</code>. Our tasks starts
+out the same as before, creating a <code>server</code> socket, binding it to a random port,
+gets that port and sends it to our <code>&quot;clients task&quot;</code> and then calls <code>listen</code>.
+At this point, things start to change, first we define our <code>clients</code> map as
+empty we then use <code>handle_accept</code> to accept the first connection and then call
+<code>server:settimeout(0)</code> to avoid a potential server that will yield forever. </p>
+<p>Inside of our long-running loop, we start out by defining a new table <code>recvt</code> which
+will match the argument to <code>select</code> which has the same name. We then loop over our
+<code>clients</code> table, inserting any of the keys into <code>recvt</code>. We keep these as separate
+tables because we want to be able to remove a <code>client</code> from our readiness check
+once it has closed. Next, we check to see how large <code>recvt</code> is, if it is below 5
+we add <code>server</code> into it. By only including <code>server</code> when <code>recvt</code> has fewer than
+5 clients we have enforced our max connections limit.</p>
+<p>With <code>recvt</code> defined we can finally call <code>cosock.socket.select</code>, we use <code>recvt</code> as
+the first argument, an empty table as the <code>sendt</code> argument and finally a timeout of 5 seconds.
+We assign the result of <code>select</code> into <code>recvr, _sendr, err</code>, we would expect that
+<code>recvr</code> would contain any of our <code>clients</code> that are ready to <code>receive</code> and, if
+we are below the limit, <code>server</code>. If <code>recvr</code> is <code>nil</code> we would expect <code>err</code> to be
+the string describing that error. If <code>err</code> is <code>&quot;timeout&quot;</code> then we exit our server
+task which should exit the application. If we don't have an <code>err</code> then we loop over
+all the <code>recvr</code>s and check to see if they are our <code>server</code>, if so we call
+<code>handle_accept</code> if not then we call <code>handle_recv</code>. Each of our helpers will update
+the <code>clients</code> map to ensure that we service all of the client requests before exiting.</p>
+<p>The last change we've made is to <code>spawn_client</code> which previously would loop forever,
+it now loops 10 times before exiting and closing the <code>client</code>.</p>
+<p>If we were to run this you would see each of the tasks spawn in a random order and
+the first 5 of those would begin sending their <code>&quot;ping&quot;</code> messages. Once 1 of them
+completes, we would accept the next connection but not before that point which means
+we have limited our total number of connected clients to 5!</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="integrating-with-cosock"><a class="header" href="#integrating-with-cosock">Integrating with Cosock</a></h1>
+<p>So far we have covered what cosock provides but what if we want to integrate our
+own libraries directly into cosock, what would that look like?</p>
+<p>To start the general interface for a &quot;cosock aware&quot; lua table is to define a method <code>setwaker</code>
+which takes 2 arguments, <code>kind: str</code> and <code>waker: fun()|nil</code>. The general idea here is
+that a &quot;waker&quot; function can be provided that will get called when that task is ready
+to be woken again.</p>
+<p>Let's try and build an example <code>Timer</code> that will define this <code>setwaker</code> method to make
+it &quot;cosock aware&quot;</p>
+<pre><code class="language-lua">local cosock = require &quot;cosock&quot;
+
+local Timer = {}
+Timer.__index = Timer
+
+function Timer.new(secs)
+  return setmetatable({
+    secs = secs,
+    waker = nil,
+  }, Timer)
+end
+
+function Timer:wait()
+  coroutine.yield({self}, {}, self.secs)
+end
+
+function Timer:setwaker(kind, waker)
+  print(&quot;setwaker&quot;, kind, waker)
+  if waker then
+    self.waker = function()
+      print(&quot;waking up!&quot;)
+      waker()
+    end
+  else
+    self.waker = nil
+  end
+end
+
+cosock.spawn(function()
+  local t = Timer.new(2)
+  print(&quot;waiting&quot;)
+  t:wait()
+  print(&quot;waited&quot;)
+end)
+
+cosock.run()
+</code></pre>
+<p>To start we create a lua meta-table <code>Timer</code>, which has the properties <code>secs: number</code> and
+<code>waker: fun()|nil</code>. There is a constructor <code>Timer.new(secs)</code> which takes the number of
+seconds we want to wait for. Finally, we define <code>Timer:wait</code> which is where our magic happens.
+This method calls <code>coroutine.yield</code>, with 3 arguments <code>{self}</code>, an empty table, and <code>self.secs</code>.
+These arguments match exactly what would be passed to <code>socket.select</code>, the first is a list of any
+receivers, the second is a list of any senders and finally the timeout. Since we pass <code>{self}</code> as the
+first argument that means we are treating <code>Timer</code> as a receiver. Ultimately what we are doing here
+is asking <code>cosock</code> to call <code>socket.select({self}, {}, self.secs)</code>. While we don't end up calling <code>self.waker</code>
+ourselves, cosock uses <code>setwaker</code> to register tasks to be resumed so we need to conform to that. Just to
+illustrate that is happening, a <code>print</code> statement has been added to <code>setwaker</code>, if we run this
+we would see something like the following.</p>
+<pre><code class="language-shell">waiting
+setwaker        recvr   function: 0x5645e6410770
+setwaker        recvr   nil
+waited
+</code></pre>
+<p>We can see that cosock calls <code>setwaker</code> once with a function and a second time with <code>nil</code>. Notice though
+that <code>self.waker</code> never actually gets called, since we don't see a <code>&quot;waking up&quot;</code> message. That
+is because we don't really <em>need</em> to be woken up, our timer yields the whole coroutine until
+we have waited for <code>self.secs</code>, nothing can interrupt that. Let's extend our <code>Timer</code> to have a reason
+to call <code>self.waker</code>, we can do that by adding the ability to cancel a <code>Timer</code>.</p>
+<pre><code class="language-lua">local cosock = require &quot;cosock&quot;
+
+local Timer = {}
+Timer.__index = Timer
+
+function Timer.new(secs)
+  return setmetatable({
+    secs = secs,
+    waker = nil,
+  }, Timer)
+end
+
+function Timer:wait()
+  local r, s, err = coroutine.yield({self}, {}, self.secs)
+  if err == &quot;timeout&quot; then
+    return 1
+  end
+  return nil, &quot;cancelled&quot;
+end
+
+function Timer:setwaker(kind, waker)
+  print(&quot;setwaker&quot;, kind, waker)
+  if waker then
+    self.waker = function()
+      print(&quot;waking up!&quot;)
+      waker()
+    end
+  else
+    self.waker = nil
+  end
+end
+
+function Timer:cancel()
+  if self.waker then
+    self.waker()
+  end
+end
+
+cosock.spawn(function()
+  local t = Timer.new(10)
+  cosock.spawn(function()
+    cosock.socket.sleep(3)
+    t:cancel()
+  end)
+  print(&quot;waiting&quot;)
+  local s = os.time()
+  local success, err = t:wait()
+  local e = os.time()
+  print(&quot;waited&quot;, os.difftime(e, s), success, err)
+end)
+
+cosock.run()
+</code></pre>
+<p>In this example, we create our timer that will wait 10 seconds but before we call <code>wait</code> we
+spawn a new task that will sleep for 3 seconds and then call <code>cancel</code>. If we look over the
+changes made to <code>wait</code> we can see that we still call <code>coroutine.yield({self}, {}, self.secs)</code>
+but this time we are assigning its result to <code>r, s, err</code>. Cosock calls <code>coroutine.resume</code>
+with the same return values we would get from <code>select</code>, that is a list of ready receivers,
+a list of ready senders, and an optional error string. If the timer expires, we would expect
+to get back <code>nil, nil, &quot;timeout&quot;</code>, if someone calls the <code>waker</code> before our timer expires
+we would expect to get back <code>{self}, {}, nil</code>. This means we can treat any <code>err == &quot;timeout&quot;</code>
+as a normal timer expiration but if <code>err ~= &quot;timeout&quot;</code> then we can safely assume our timer was canceled.
+If we were to run this code we would see something like the following.</p>
+<pre><code class="language-shell">waiting
+setwaker        recvr   function: 0x556d39beb6d0
+waking up!
+setwaker        recvr   nil
+setwaker        recvr   nil
+waited  3.0     nil     cancelled
+</code></pre>
+<p>Notice we only slept for 3 seconds instead of 10, and <code>wait</code> returned <code>nil, &quot;cancelled&quot;</code>!
+One thing we can take away from this new example is that the waker API is designed to allow
+one coroutine to signal cosock that another coroutine is ready to wake up. With that in mind,
+let's try and build something a little more useful, a version of the
+<code>cosock.channel</code> api that allows for a maximum queue size. Looking over the
+<a href="https://github.com/cosock/cosock/blob/8388c8ebcf5810be2978ec18c36c3561eedb5ea8/cosock/channel.lua">existing channels</a>,
+to implement this we are going to need to have 3 parts. A shared table for queueing and
+setting the appropriate wakers, a receiver table and a sender table. Let's start by
+defining the shared table.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="bounded-channel"><a class="header" href="#bounded-channel">Bounded Channel</a></h1>
+<p>To start we are going to define a Lua table that will represent our shared bounded
+queue.</p>
+<pre><code class="language-lua">local BoundedChannel = {}
+BoundedChannel.__index = BoundedChannel
+</code></pre>
+<p>This table should have the following properties</p>
+<ul>
+<li><code>_wakers</code>: This is a table with 2 keys
+<ul>
+<li><code>sendr</code>: This is a map of potential functions where the keys are a table representing
+the waiting sender</li>
+<li><code>recvr</code>: An optional function that takes no arguments, this will wake our receiver</li>
+</ul>
+</li>
+<li><code>_max_depth</code>: This is the integer value that our queue should not grow larger than</li>
+<li><code>_msg_queue</code>: This is the message queue we will use to hold pending messages</li>
+<li><code>_closed</code>: This is a boolean to indicate if we have been explicitly closed</li>
+</ul>
+<p>To make our lives easier, next we will add a couple of methods that will enforce the
+queue nature of our <code>_msg_queue</code>, one for removing the oldest message and one for
+adding a new message.</p>
+<pre><code class="language-lua">function BoundedChannel:pop_front()
+  return table.remove(self._msg_queue, 1)
+end
+
+--- Add a new element to the back of this channel
+function BoundedChannel:push_back(ele)
+  table.insert(self._msg_queue, ele)
+end
+</code></pre>
+<p>Next, let's add a method for testing if we can send a new message.</p>
+<pre><code class="language-lua">function BoundedChannel:can_send()
+  if self._closed then
+    -- Check first that we are not closed, if we are
+    -- return an error message
+    return nil, &quot;closed&quot;
+  end
+  if #self._msg_queue &gt;= self._max_depth then
+    -- Check next if our queue is full, if it is
+    -- return an error message
+    return nil, &quot;full&quot;
+  end
+  -- The queue is not full and we are not closed, return 1
+  return 1
+end
+</code></pre>
+<p>This method first checks that we haven't been closed, if we have then it returns
+<code>nil, &quot;closed&quot;</code>, if we are still open it next checks to see if we have any space in
+our queue, if not it returns <code>nil, &quot;full&quot;</code>. So if we are not closed and not full
+it returns 1.</p>
+<p>Now we should create a similar method for checking if we can receive a new message.</p>
+<pre><code class="language-lua">function BoundedChannel:can_recv()
+  if self._closed and #self._msg_queue == 0 then
+    -- Check first that we haven't closed, if so
+    -- return an error message
+    return nil, &quot;closed&quot;
+  end
+  if #self._msg_queue == 0 then
+    -- Check next that we have at least 1 message,
+    -- if not, return an error message
+    return nil, &quot;empty&quot;
+  end
+  -- We are not closed and we have at least 1 pending message, return 1
+  return 1
+end
+</code></pre>
+<p>Again, we being by checking for the closed case, returning <code>nil, &quot;closed&quot;</code>, then we
+check to see if the queue is empty, if so we return <code>nil, &quot;empty&quot;</code> if there is
+at least 1 message and we aren't closed then we return <code>1</code>.</p>
+<p>Now we can define a few methods for interacting with our <code>self._wakers</code> property.
+First up is the <code>set_waker_recvr</code> method.</p>
+<pre><code class="language-lua">function BoundedChannel:set_waker_recvr(waker)
+  self._wakers.recvr = waker
+  if waker and self:can_recv() then
+    -- Check if receiving is currently available, if
+    -- so call the waker to wake up the yielded receiver
+    waker()
+  end
+end
+</code></pre>
+<p>Ok, so this one is pretty simple now that we have our helpers. First, we populate the
+value in <code>self._wakers.recvr</code>. If <code>waker</code> is not <code>nil</code> and <code>self:can_recv</code> returns <code>1</code> we want to
+immediately call the <code>waker</code> because it means we are ready to be woken up.</p>
+<p>For our next method, we are going to define <code>set_waker_sendr</code>.</p>
+<pre><code class="language-lua">function BoundedChannel:set_waker_sendr(sendr, waker)
+  self._wakers.sendr[sendr] = waker
+end
+</code></pre>
+<p>This looks quite a bit different from <code>set_waker_recvr</code>! First of all, we have an extra argument
+<code>sendr</code> which will represent a unique call to <code>coroutine.yield</code> and is how we can allow for
+multiple senders. The second thing to notice is that we are not checking to see if <code>self:can_send</code>
+this is because we don't know if another <code>waker</code> has already been woken up for the current state.
+This is all a bit hand-wavy right now but when we implement the sender things should become clear.</p>
+<p>Now that we can set a waker, it is time to add a method for calling those waker functions.</p>
+<pre><code class="language-lua">function BoundedChannel:try_wake(kind)
+  local waker
+  if kind == &quot;sendr&quot; then
+    _, waker = next(self._wakers.sendr)
+  else
+    waker = self._wakers.recvr
+  end
+  if type(waker) == &quot;function&quot; then
+    waker()
+  end
+end
+</code></pre>
+<p>Our new <code>try_wake</code> method takes 1 argument, which will either be the string <code>&quot;sendr&quot;</code> or <code>&quot;recvr&quot;</code>.
+If we are trying to wake a <code>&quot;sendr&quot;</code> then we use
+<a href="https://www.lua.org/manual/5.3/manual.html#pdf-next">the <code>next</code> function</a> to find 1 entry in the
+table <code>self._wakers.sendr</code>, if we have at least 1 entry in that table we assign the value to <code>waker</code>.
+If we are trying to wake a <code>&quot;recvr&quot;</code> we assign <code>self._wakers.recvr</code> to <code>waker</code>. If <code>waker</code> is
+a function (aka not <code>nil</code>) then we call that function.</p>
+<pre><code class="language-lua">function BoundedChannel:close()
+  self._closed = true
+end
+</code></pre>
+<p><code>close</code> will just set our <code>_closed</code> property
+to <code>true</code></p>
+<p>Ok, now that we have our shared channel defined, let's implement our receiver.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="bounded-recvr"><a class="header" href="#bounded-recvr">Bounded Recvr</a></h1>
+<p>Next, we will define a Lua table that will represent the receiving half of our channel. This
+table will have 2 properties <code>_link</code> which will be our <code>BoundedChannel</code> and a <code>timeout</code> which will
+be an optional <code>number</code>.</p>
+<pre><code class="language-lua">local BoundedChannelReceiver = {}
+BoundedChannelReceiver.__index = BoundedChannelReceiver
+</code></pre>
+<p>Ok, let's create a constructor for it, this will take 1 argument which should populate
+its <code>_link</code> property.</p>
+<pre><code class="language-lua">function BoundedChannelReceiver.new(shared_queue)
+  return setmetatable({_link = shared_queue}, BoundedChannelReceiver)
+end
+</code></pre>
+<p>Notice we didn't include a <code>timeout</code> property at all, this is because
+we want it to be <code>nil</code> by default. In order to match the same API that
+<code>cosock.channel</code> uses let's add a method for setting our <code>timeout</code>.</p>
+<pre><code class="language-lua">function BoundedChannelReceiver:settimeout(timeout)
+  self.timeout = timeout
+end
+</code></pre>
+<p>Next, we want to define the <code>setwaker</code> method used by this side of the queue.</p>
+<pre><code class="language-lua">function BoundedChannelReceiver:setwaker(kind, waker)
+  if kind ~= &quot;recvr&quot; then
+    error(&quot;Unsupported wake kind for receiver: &quot; .. tostring(kind))
+  end
+  self._link:set_waker_recvr(waker)
+end
+</code></pre>
+<p>In this method, we have added a check to make sure it isn't getting called
+with a <code>kind</code> of <code>&quot;sendr&quot;</code> since that would be pretty much meaningless. If
+we have a valid <code>kind</code> then we pass the waker down to <code>self._link:set_waker_recvr</code>.</p>
+<p>Ok, now for the good stuff: the <code>receive</code> method.</p>
+<pre><code class="language-lua">function BoundedChannelReceiver:receive()
+  while true do
+    local can_recv, err = self._link:can_recv()
+    if can_recv then
+      local element = self._link:pop_front()
+      self._link:try_wake(&quot;sendr&quot;)
+      return element
+    end
+    if err == &quot;closed&quot; then
+      return nil, err
+    end
+    if err == &quot;empty&quot; then
+      local _r, _s, err = coroutine.yield({self}, nil, self.timeout)
+      if err then
+        return nil, err
+      end
+    end
+  end
+end
+</code></pre>
+<p>Alright, there is a lot going on here so let's unpack it. To start we have a long-running
+loop that will only stop when we have reached either an error or a new message. Each iteration
+of the loop first checks if <code>self._link:can_recv()</code>, if that returns <code>1</code>, then we call
+<code>self._link:pop_front</code> to capture our eventual return value, next we want
+to alert any senders that more space has just been made on our queue so we call
+<code>self._link:try_wake(&quot;sendr&quot;)</code>, finally we return the element we popped off ending our loop.
+If <code>can_recv</code> returned <code>nil</code> we check to see which <code>err</code> was provided, if it was <code>&quot;closed&quot;</code>
+we return that in the error position also ending our loop. If <code>can_recv</code> returns <code>nil, &quot;empty&quot;</code>
+then we want to yield until either we get woken by a sender or we have waited for the duration
+of <code>self.timeout</code>. We do this by calling <code>coroutine.yield({self}, nil, self.timeout)</code>, this
+will give up control to cosock until either someone calls <code>BoundedChannel:try_wake(&quot;recvr&quot;)</code> or our
+<code>timeout</code> is reached.</p>
+<p>If we recall that <code>coroutine.yield</code> returns a list of ready receivers and a list of senders
+or <code>nil, nil</code> and an error message. This means if <code>coroutine.yield</code> returns <code>{self}</code> then
+we have a new message so we go to the top of the loop and the next call to <code>self.link:can_recv</code>
+should return <code>1</code> or <code>nil, &quot;closed&quot;</code>. If <code>coroutine.yield</code> returns <code>nil, nil, &quot;timeout&quot;</code> that
+means we have yielded for <code>self.timeout</code>.</p>
+<p>One final thing we want to make sure is that we are keeping our end of that <code>nil &quot;closed&quot;</code>
+bargain, so let's define a <code>closed</code> method.</p>
+<pre><code class="language-lua">function BoundedChannelReceiver:close()
+  self._link:close()
+  --- If anything is waiting to send, it should wake up with an error
+  self._link:try_wake(&quot;sendr&quot;)
+end
+</code></pre>
+<p>For this, we first call <code>self.link:close</code> which will set our shared table's <code>_closed</code> property
+to <code>true</code> which will ultimately make both <code>can_send</code> and <code>can_recv</code> return <code>nil, &quot;closed&quot;</code>. Next,
+we want to wake up any sending tasks since they are reliant on us to tell them something has
+changed, so we call <code>self._link:try_wake(&quot;sendr&quot;)</code>.</p>
+<p>With that we have the complete receiver side of our channel, now let's write up the sender.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="bounded-channel-sendr"><a class="header" href="#bounded-channel-sendr">Bounded Channel: Sendr</a></h1>
+<p>To start, we define our Lua table which represents the sending half of our channel.</p>
+<pre><code class="language-lua">local BoundedChannelSender = {}
+BoundedChannelSender.__index = BoundedChannelSender
+</code></pre>
+<p>This table will have the same shape as our <code>BoundedChannelReceiver</code>, it will have a
+<code>_link</code> property and a <code>timeout</code> property; our constructor is nearly identical.</p>
+<pre><code class="language-lua">function BoundedChannelSender.new(shared_queue)
+  return setmetatable({_link = shared_queue}, BoundedChannelSender)
+end
+</code></pre>
+<p>We will also define a <code>settimeout</code> method that looks exactly the same.</p>
+<pre><code class="language-lua">function BoundedChannelSender:settimeout(timeout)
+  self.timeout = timeout
+end
+</code></pre>
+<p>Our <code>close</code> method is also very close to the receiver's implementation.</p>
+<pre><code class="language-lua">function BoundedChannelSender:close()
+  self._link:close()
+  -- If anything is waiting to receieve it should wake up with an error
+  self._link:try_wake(&quot;recvr&quot;)
+end
+</code></pre>
+<p>Here, just the argument to <code>self._link:try_wake</code> changed from <code>&quot;sendr&quot;</code> to <code>&quot;recvr&quot;</code>.</p>
+<p>Now we start to see things become quite different. The first thing to note is that we are
+not going to define a <code>setwaker</code> method for this table. This may seem strange since it is
+one of the few things that we need to do to make a &quot;cosock aware&quot; table but if we were
+to use the same <code>setwaker</code> for all of the places that we call <code>BoundedSender:send</code>, we would
+end up gumming up the internal workings of cosock. To see how we get around this it would be
+good to go over the implementation of <code>send</code>.</p>
+<pre><code class="language-lua">function BoundedChannelSender:send(msg)
+  while true do
+    
+    local can_send, err = self._link:can_send()
+    if can_send then
+      self._link:push_back(msg)
+      -- Wake any receivers wo might be waiting to receive
+      self._link:try_wake(&quot;recvr&quot;)
+      return 1
+    end
+    if err == &quot;closed&quot; then
+      return nil, &quot;closed&quot;
+    end
+    if err == &quot;full&quot; then
+      local wake_t = {
+        setwaker = function(t, kind, waker)
+          assert(kind == &quot;sendr&quot;)
+          self._link:set_waker_sendr(t, waker)
+        end
+      }
+      local _r, _s, err = coroutine.yield(nil, {wake_t}, self.timeout)
+      if err then
+        return nil, err
+      end
+    end
+  end
+end
+</code></pre>
+<p>To start, things look a lot like our <code>BoundedRecvr:receive</code> implementation, we have
+a long-running loop that first calls <code>self._link:can_send</code>, if that returns <code>1</code> we
+use the <code>push_back</code> helper to add the message to our queue and then we try to wake up
+any yielded <code>&quot;recvr&quot;</code>s, returning <code>1</code> to indicate it was successful. If <code>can_send</code> returned
+an error message and that message was <code>&quot;closed&quot;</code> we return <code>nil, &quot;closed&quot;</code>. If <code>can_send</code> returned
+the error message <code>&quot;full&quot;</code> we want to <code>yield</code> until we can try again. </p>
+<p>To prepare for yielding, we first create a table called <code>wake_t</code> this will represent a single
+call to <code>BoundedSender:send</code> that is yielding. On <code>wake_t</code> we set 1 property and that is the
+<code>setwaker</code> method which uses <code>assert</code> to raise an error if it was called with a <code>kind</code>
+of <code>&quot;recvr&quot;</code> and then uses the <code>BoundedChannel:set_waker_sendr</code> method to associate the
+<code>waker</code> argument with <code>wake_t</code>. By creating this temporary table, what we are doing is allowing
+for a unique <code>waker</code> function to be defined on any threads that need waking. If we were to use a
+single <code>BoundedChannel._wakers.sendr</code> function, we would end up removing the ability
+to wake any <code>yields</code> beyond the last because calling <code>waker</code> always calls <code>setwaker(kind, nil)</code> to
+avoid potential &quot;double wakes&quot;.</p>
+<p>Now that we have set up our <code>wake_t</code> we can call <code>couroutine.yield</code> this time we are going
+to use the arguments <code>nil, {wake_t}, self.timeout</code>. Since we put <code>wake_t</code> in the <code>sendt</code>
+argument, we will wait until we either reach the duration of <code>self.timeout</code> or when someone
+calls <code>BoundedChannel:try_wake(&quot;sendr&quot;)</code> and our <code>wake_t</code> is returned from <code>next</code>.</p>
+<blockquote>
+<p>This is probably the easiest way to create these unique <code>waker</code>s but it does come with a
+potential issue. If you are interested in <em>using</em> this implementation please review
+<a href="./Appendix-A.html">Appendix-A</a></p>
+</blockquote>
+<p>Now, let's finish up our implementation and see if we can see our bounded channel working.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="bounded-channel-finish"><a class="header" href="#bounded-channel-finish">Bounded Channel: Finish</a></h1>
+<p>At this point, we have most of our <code>BoundedChannel</code> and all of our <code>BoundedChannelReceiver</code>
+and <code>BoundedChannelSender</code> set up so the last thing we need to do is add a constructor
+to <code>BoundedChannel</code>.</p>
+<pre><code class="language-lua">function BoundedChannel.new(max_depth)
+  local link = setmetatable({
+    _max_depth = max_depth,
+    _wakers = {
+      sendr = {},
+    },
+    _msg_queue = {},
+    _closed = false,
+  }, BoundedChannel)
+  return BoundedChannelSender.new(link), BoundedChannelReceiver.new(link)
+end
+</code></pre>
+<p>This constructor takes 1 argument, the number telling us how large our queue can get.
+This returns 2 tables, the first return is a <code>BoundedChannelSender</code> and the second
+return is a <code>BoundedChannelReceiver</code> both have the same shared <code>BoundedChannel</code> as
+their <code>_link</code> property.</p>
+<p>Now let's see our new channel in action!</p>
+<pre><code class="language-lua">local cosock = require &quot;cosock&quot;
+local BoundedChannel = require &quot;examples.bounded_channel&quot;
+
+local tx, rx = BoundedChannel.new(2)
+
+cosock.spawn(function()
+  local s = cosock.socket.gettime()
+  for i=1,10 do
+    tx:send(i)
+    local e = cosock.socket.gettime()
+    print(string.format(&quot;sent %s in %.1fs&quot;, i, e - s))
+    s = e
+    cosock.socket.sleep(0.2)
+  end
+end, &quot;sendr1&quot;)
+
+cosock.spawn(function()
+  local s = cosock.socket.gettime()
+  for i=11,20 do
+    tx:send(i)
+    local e = cosock.socket.gettime()
+    print(string.format(&quot;sent %s in %.1fs&quot;, i, e - s))
+    s = e
+    cosock.socket.sleep(0.2)
+  end
+end, &quot;sendr2&quot;)
+
+cosock.spawn(function()
+  local s = cosock.socket.gettime()
+  for i=1,20 do
+    local msg = rx:receive()
+    local e = cosock.socket.gettime()
+    print(string.format(&quot;recd %s in %.1fs&quot;, msg, e - s))
+    s = e
+    cosock.socket.sleep(1)
+  end
+end, &quot;recvr&quot;)
+
+cosock.run()
+</code></pre>
+<p>After we import both <code>cosock</code> and our <code>BoundedChannel</code> we create a new channel pair
+with a maximum queue size of 2. We then spawn 2 new tasks for the sender, in these tasks
+we loop 10 times, sending a message and then sleeping for 0.2 seconds.
+We have a call to <code>cosock.socket.gettime</code> here before and after the <code>send</code> to see if there is any
+delay.</p>
+<p>Next, we spawn a task for our receiver, this receives a message and then sleeps for 1 second
+20 times.</p>
+<p>Since we are sending a lot faster than we are receiving, we would expect that after the
+first few messages we should see the amount of time it takes to send a message hits about
+1 second indicating that our queue has reached its maximum of 2. If we were to run this
+we should see something <em>like</em> the following.</p>
+<pre><code class="language-text">sent 1 in 0.0s
+sent 11 in 0.0s
+recd 1 in 0.0s
+sent 2 in 0.2s
+recd 11 in 1.0s
+sent 12 in 1.0s
+recd 2 in 1.0s
+sent 13 in 1.0s
+recd 12 in 1.0s
+sent 14 in 1.0s
+recd 13 in 1.0s
+sent 15 in 1.0s
+recd 14 in 1.0s
+sent 16 in 1.0s
+recd 15 in 1.0s
+sent 17 in 1.0s
+recd 16 in 1.0s
+sent 18 in 1.0s
+recd 17 in 1.0s
+sent 19 in 1.0s
+recd 18 in 1.0s
+sent 20 in 1.0s
+recd 19 in 1.0s
+sent 3 in 9.8s
+recd 20 in 1.0s
+sent 4 in 1.0s
+recd 3 in 1.0s
+sent 5 in 1.0s
+recd 4 in 1.0s
+sent 6 in 1.0s
+recd 5 in 1.0s
+sent 7 in 1.0s
+recd 6 in 1.0s
+sent 8 in 1.0s
+recd 7 in 1.0s
+sent 9 in 1.0s
+recd 8 in 1.0s
+sent 10 in 1.0s
+recd 9 in 1.0s
+recd 10 in 1.0s
+</code></pre>
+<p>From this output, we can determine the exact order things played out. First,
+we can see that <code>sendr1</code> is able to push <code>1</code> onto the queue, then it sleeps for 0.2
+seconds which allows <code>sendr2</code> to push <code>11</code> onto the queue which also sleeps for 0.2
+seconds then <code>recvr</code> pops <code>1</code> off the queue followed by a 1-second sleep.</p>
+<p>For the first time at this point, we have 3 sleeping tasks. Since <code>sendr1</code> went first
+it will be the first to wake from its <code>sleep</code>, pushes <code>2</code> onto the queue and
+then goes back to <code>sleep</code> which allows <code>sendr2</code> to wake up and try to send <code>12</code> but the queue is
+full (<code>{11, 2}</code>), so it has to wait until <code>recvr</code> wakes up to pop <code>11</code> off the queue. Once <code>recvr</code>
+pops <code>11</code> off the queue, we see that <code>sendr2</code> is able to push <code>12</code> but it took 1 full second
+to do so! Now we will stay in a state where both <code>sendr1</code> and <code>sendr2</code> are waiting to send
+for ~1 second until <code>recvr</code> is able to <code>receive</code> at which point either <code>sendr1</code> or <code>sendr2</code>
+again pushes a new value. Once we reach the last 2 values, we see that our <code>sendr</code>s go quiet
+because they are all done with their work but <code>recvr</code> still takes another 2 seconds to complete.</p>
+<blockquote>
+<p>Did you notice that <code>sendr2</code> gets to go far more often than <code>sendr1</code> at this start and
+it takes <code>sendr1</code> 9.8 seconds to send <code>3</code>?
+<a href="./Appendix-A.html">This is because of our waker scheme and Appendix A has more on that</a></p>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="appendix-a-bounded-channel-limits"><a class="header" href="#appendix-a-bounded-channel-limits">Appendix A: Bounded Channel Limits</a></h1>
+<p>In our <code>BoundedChannelSender:send</code>, <code>BoundedChannel:set_waker_sendr</code> and
+<code>BoundedChannel:try_wake</code> we have made some decisions that make our implementation a little easier
+to read/write but might cause some problems if we end up depending on it.</p>
+<p>To review, any time <code>BoundedChannelSender:send</code> would <code>yield</code> we create a temporary table
+to handle our <code>setwaker</code> calls and in <code>BoundedChannel:set_waker_sendr</code>
+we use that table as the key to <code>_wakers.sendr</code> to store/remove the <code>waker</code> function.</p>
+<p>In <code>BoundedChannel:try_wake</code> we use the <code>next</code> function to choose which entry of <code>_wakers.sendr</code> to
+call. The <code>next</code> function will always return the &quot;first&quot; key/value pair but what does that mean,
+how can Lua tables be ordered? When a table is created, it is assigned a memory address, unique
+to that table, we can see what the address is by using the default <code>__tostring</code> metamethod.</p>
+<pre><code class="language-sh">lua -e &quot;print({})&quot;
+table: 0x5581bc0236a0
+</code></pre>
+<p>In the above, we can see the memory address of an empty table is <code>0x5581bc0236a0</code>, which will
+change if we were to run it again. If we were to use this table as the key in another table that
+table would look something like this.</p>
+<pre><code class="language-lua">{
+  [0x5581bc0236a0] = &quot;first element&quot;
+}
+</code></pre>
+<p>So, let's look at how Lua might order a table like this with more than one key.</p>
+<!-- Now that we have that outline, let's go over how this might negatively impact our send wakers.
+The key issue here is that `next` will return the `waker` associated to the `wake_t` that has
+the lowest memory address meaning we could potentially end up starving one of our senders if
+our queue is full more than it is not. For example. -->
+<pre><code class="language-lua">local tables = {}
+for i=1, 10 do
+  tables[{}] = i
+end
+
+for i=1, 10 do
+  local t, v = next(tables)
+  local tp = tonumber(tostring(t):match(&quot;table: 0x(.+)&quot;), 16)
+  print(tp, v)
+  tables[t] = nil
+end
+</code></pre>
+<p>This example will create a table <code>tables</code> then loop 10 times assigning <code>tables[{}]</code> with <code>i</code>.
+In a second loop to 10, we use the <code>next</code> function to pull the &quot;first&quot; key/value pair from
+our <code>tables</code>. We then convert <code>t</code> by converting it into a hex string and then converting it
+back into a number, which may be easier to read for some than trying to tell which hex value
+is larger than another. It prints out the table representation and which <code>i</code> was assigned to it
+then removes it from <code>tables</code> by assigning <code>tables[t]</code> with <code>nil</code>. If we run this once we might
+see something like. </p>
+<pre><code>93877018273488  1
+93877018274240  9
+93877018274016  7
+93877018273792  5
+93877018273616  3
+93877018274352  10
+93877018274128  8
+93877018273904  6
+93877018273680  4
+93877018273552  2
+</code></pre>
+<p>At first, it looks like it might go in order because we get <code>1</code> but then we
+see the second return from <code>next</code> is <code>9</code>. If we run it again we might see something like:</p>
+<pre><code class="language-sh">93837605766864  2
+93837605767120  6
+93837605767376  10
+93837605766928  3
+93837605767184  7
+93837605766992  4
+93837605767248  8
+93837605766800  1
+93837605767056  5
+93837605767312  9
+</code></pre>
+<p>This time, we get <code>2</code> first and <code>9</code> last which means that we can expect the order to be somewhat
+random. We can also see pretty obviously that Lua has ordered the keys by the lowest memory address
+first. That means that <code>next</code> will return the <code>waker</code> associated to the <code>wake_t</code> that has
+the lowest memory address. So what happens if one coroutine <em>always</em> gets the lowest value?
+It could starve other coroutines from being able to <code>send</code>.</p>
+<p>This might not be all bad though, randomness can be good since we don't want to show a preference
+and randomness does just that but that would require something like &quot;a normalized distribution&quot;
+which would mean it would take a very long time to see the same order. Let's see how random our
+temporary table keys are.</p>
+<pre><code class="language-lua">local m = {
+  sets = {}
+}
+
+local table_size = 9
+
+function m:add_set(set)
+  for idx, existing in ipairs(self.sets) do
+    local exact_match = false
+    local left_t, left_v, right_t, right_v
+    for i=1,table_size do
+      left_t, left_v = next(set, left_t)
+      right_t, right_v = next(existing, right_t)
+      exact_match = left_v == right_v
+      if not exact_match then
+        break
+      end
+    end
+    
+    if exact_match then
+      table.insert(self.sets, set)
+      return {
+        first = existing,
+        first_idx = idx,
+        second = set,
+        second_idx = #self.sets
+      }
+    end
+  end
+  table.insert(self.sets, set)
+end
+
+local function gen_set()
+  local tables = {}
+  for i=1, table_size do
+    tables[{}] = i
+  end
+  return tables
+end
+
+local result
+
+repeat
+  result = m:add_set(gen_set())
+until result
+
+print(&quot;RESULT&quot;)
+print(result.first_idx, result.second_idx)
+print(&quot;f,s&quot;)
+for i=1,table_size do
+  local t1, v1 = next(result.first)
+  local t2, v2 = next(result.second)
+  print(string.format(&quot;%s,%s&quot;, v1, v2))
+  result.first[t1] = nil
+  result.second[t2] = nil
+end
+</code></pre>
+<p>Here we have extended our example to allow for repeating the creation of <code>tables</code> and then checking
+to see if the new version matches any of the previous versions. We reduced the number of entries
+to 9 to make it easier to read the results but otherwise, <code>get_set</code> will create the same table
+as our original example. We have defined a table to hold all of our sets named <code>m</code> and defined a
+method there <code>add_set</code> which will either return <code>nil</code> if the <code>set</code> argument isn't already in the
+list or a results table if it was found. So what happens if we run this?</p>
+<pre><code class="language-text">RESULT
+1       4
+f,s
+4,4
+8,8
+1,1
+5,5
+9,9
+2,2
+6,6
+3,3
+7,7
+</code></pre>
+<p>It looks like it only took us 3 sets to find the exact same order. Considering that 0-9 have
+a potential number of combinations greater than 300,000 it seems that our distribution not very
+normal.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="advanced"><a class="header" href="#advanced">Advanced</a></h1>
+<p>In the following chapters, we will discuss in detail the inner workings of <code>cosock</code>. The subject
+matter is going to shift focus from &quot;how do I use cosock&quot; to &quot;how does cosock work&quot; which may
+not be of interest to everyone.</p>
+<h2 id="internals"><a class="header" href="#internals">Internals</a></h2>
+<p>This section will go over the contents of the <code>cosock.socket.internals</code> module and how that
+interacts with the <code>cosock</code> runtime and the underlying Luasocket library.</p>
+<h2 id="run"><a class="header" href="#run">Run</a></h2>
+<p>This is a step-by-step explanation of what happens in each pass through the main loop
+of <code>cosock.run</code>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="internals-1"><a class="header" href="#internals-1">Internals</a></h1>
+<p>The module <code>cosock.socket.internals</code> is where luasocket gets wrapped into a &quot;cosock aware&quot;
+table. Initially, a call to <code>passthroughbuilder</code> is used to create a &quot;builder&quot; function.
+<code>passthroughbuilder</code> takes 2 arguments, <code>recvmethods</code> and <code>sendmethods</code> which are both
+a table where the keys are a method name and the values are a set-like table of
+error messages that it would be appropriate to <code>yield</code> for. A good example of one of these is
+the <code>tcp</code> module's <code>recvmethods</code>.</p>
+<pre><code class="language-lua">local recvmethods = {
+  receive = {timeout = true},
+  accept = {timeout = true},
+}
+</code></pre>
+<p>In both of the methods defined here, if we were to get the return value of <code>nil, &quot;timeout&quot;</code>
+would be a signal to call <code>coroutine.yield</code> and try again. The return value of
+<code>passthroughbuilder</code> is a function that we will call <code>builder</code>. <code>builder</code> takes 2 arguments
+<code>method</code> which is a string and an optional <code>transformsrc</code> which is a table,
+or a function that returns a table, with the following properties.</p>
+<ul>
+<li><code>input</code>: this is an optional function that takes the method inputs and returns those inputs
+potentially transformed.
+<ul>
+<li>This is only called once, just before we call the luasocket method for the first time</li>
+</ul>
+</li>
+<li><code>blocked</code>: this is an optional function that takes the return values from the method called
+and returns the input arguments to the next call of the same method</li>
+<li><code>output</code>: This is an optional function that will be called with the return values of the method
+<ul>
+<li>This is only called once, just before we return from the method</li>
+</ul>
+</li>
+</ul>
+<p>Let's use a few examples to go over each of these starting with the <code>input</code> property.</p>
+<p>The method <code>receive</code> on a luasocket takes 2 arguments, a pattern string or number indicating
+<em>how</em> many bytes to try and read for and an optional prefix to put at the front of what was
+received.</p>
+<pre><code class="language-lua">local socket = require &quot;luasocket&quot;
+local t = socket.tcp()
+t:connect(&quot;0.0.0.0&quot;, 8000)
+print(t:receive(&quot;*l&quot;, &quot;next line:&quot;))
+</code></pre>
+<p>Assuming that some server is listening on port 8080 of the machine we run this on, we would
+receive 1 line, for example, <code>&quot;ping\n&quot;</code> this would print <code>&quot;next line: ping&quot;</code>. As we will get
+into later, a call to cosock's <code>receive</code> may end up calling luasocket's <code>receive</code>
+until we get to a new line character. So what if our server sent 1 byte at a time? We would end
+up printing <code>&quot;next line: pnext line: inext line: nnext line: g&quot;</code> if we passed the second argument
+to the underlying luasocket. To avoid this we can use the <code>input</code> property to store this pattern
+and only add it once to the eventual return value.</p>
+<p>Now let's consider the <code>blocked</code> property, continuing to use <code>receive</code> as our example method,
+what happens if we call <code>t:receive(10)</code> and again our server returns 1 byte at at time?</p>
+<p>We can't call the underlying luasocket method with <code>10</code> over and over, that would result in us
+requesting too many bytes from the socket. Instead, we need a way to capture the partial value
+we received and reduce the number of bytes accordingly. Thankfully luasocket returns
+any partial data on error as the 3rd return argument so we could do something like</p>
+<pre><code class="language-lua">{
+  blocked = function(success, err, partial)
+    table.insert(shared_buffer, partial)
+    remaining_recv = remaining_recv - #partial
+    return remaining_recv 
+  end
+}
+</code></pre>
+<p>This example assumes that <code>shared_buffer</code> and <code>remaining_recv</code> exist <em>somewhere</em> but
+you can see that we are appropriately reducing the number of bytes we return here. This
+will eventually be the argument provided to the next call to the luasocket method.
+Here is a longer-form example of how a response of 1 byte at a time would look for our
+luasocket.</p>
+<pre><code class="language-lua">local shared_buffer = {}
+local remaining_recv = 5
+--p
+local _, err, chunk = t:receive(remaining_recv)
+remaining_recv = remaining_recv - #chunk
+table.insert(shared_buffer, chunk)
+--i
+err, chunk = t:receive(remaining_recv) --i
+remaining_recv = remaining_recv - #chunk
+table.insert(shared_buffer, chunk)
+--n
+err, chunk = t:receive(remaining_recv) --n
+remaining_recv = remaining_recv - #chunk
+table.insert(shared_buffer, chunk)
+--g
+err, chunk = t:receive(remaining_recv) --g
+remaining_recv = remaining_recv - #chunk
+table.insert(shared_buffer, chunk)
+--\n
+err, chunk = t:receive(remaining_recv) --\n
+remaining_recv = remaining_recv - #chunk
+table.insert(shared_buffer, chunk)
+</code></pre>
+<p>Finally we have the <code>output</code> property which gets called with the last
+return values from our method. If we complete our example, this is where
+we would end up calling <code>table.concat(shared_buffer)</code> to add all
+the chunks together before returning. </p>
+<p>Continuing to use <code>receive</code> as an example, this is what the transform
+argument might look like.</p>
+<pre><code class="language-lua">local recvmethods = {
+  receive = {timeout = true}
+}
+local sendmethods = {}
+-- First we define a builder injecting the method&lt;-&gt;error message maps
+local builder = passthroughbuilder(recvmethods, sendmethods)
+-- Now we can use the builder to define a method that doesn't do any
+-- transformations
+m.bind = builder(&quot;bind&quot;)
+-- Here we define a method that performs some transformations
+m.receive = builder(&quot;receive&quot;, function()
+  local shared_buffer = {}
+  local remaining_recv
+  local pattern
+  return {
+    input = function(pat, prefix)
+      -- insert the prefix as the first part of our return
+      -- value if present
+      if prefix then
+        table.insert(shared_buffer, prefix)
+      end
+      if type(pat) == &quot;number&quot; then
+        -- we know how many bytes to wait for, set this
+        -- for use in blocked
+        remaining_recv = pat
+      else
+        -- store this for use in blocked
+        pattern = pat
+      end
+      -- return only pattern to avoid duplicate prefixes
+      return pattern
+    end,
+    blocked = function(_, err, partial)
+      if type(partial) == &quot;string&quot; and #partial &gt; 0 then
+        table.insert(shared_buffer, partial)
+        -- only reduce remaining_recv if it is a number
+        if remaining_recv then
+          remaining_recv = remaining_recv - #full
+          -- returning the updated remaining receive
+          return remaining_recv
+        end
+        -- otherwise we return the pattern provided to input
+        return pattern
+      end
+    end,
+    output = function(full, err, partial)
+      -- if the first return is a string with a length &gt; 0 then
+      -- add it to the buffer
+      if type(full) == &quot;string&quot; and #full &gt; 0 then
+        table.insert(shared_buffer, full)
+      end
+      -- if the third return is a string with a length &gt; 0 then
+      -- add it to the buffer
+      if type(partial) == &quot;string&quot; and #partial &gt; 0 then
+        table.insert(shared_buffer, partial)
+      end
+      -- concatenate all the strings together
+      local all = table.concat(shared_buffer)
+      if err then
+        -- if ther was an error it should go in the 3rd return
+        -- position
+        return nil, err, all
+      else
+        -- if not error then it should go in the 1st return
+        -- position
+        return all
+      end
+    end
+  }
+end)
+</code></pre>
+<p>With the arguments defined, we can now discuss the return value of <code>builder</code>
+which will be a third function, this one being
+the method's implementation, its first argument is <code>self</code> and varargs
+are used to allow for any additional arguments.</p>
+<p>Let's pause here and go over this because 3 levels of functions can be
+a bit difficult to follow. Our goal here is to re-use as much as possible
+for each of the methods on a cosock socket and since yield -&gt; retry loop is
+going to be a common pattern we can define all of that in 1 place. The key is
+that these methods are going to need to know about a few extra pieces which
+is achieved by the fact that each function's arguments are available to the
+returned function.</p>
+<p>Which means that the <code>receive</code> method would have the following environment.</p>
+<pre><code class="language-lua">local recvmethods = {
+  receive = { timeout = true }
+}
+local sendmethods = {}
+local method = &quot;receive&quot;
+local transformsrc = function() --[[see above]] end
+</code></pre>
+<p>Now let's go over what actually happens in this shared method implementation.
+First, we capture all of the varargs into a table named <code>inputparams</code>,
+if the transform object had an <code>input</code> property defined, we then overwrite
+the variable with <code>{input(table.unpack(inputparams))}</code>. Now that we have our
+inputs the way they need to be we begin a long-running <code>repeat</code>/<code>until</code>
+loop.</p>
+<p>At the top of the loop we call <code>self.inner_sock[method]</code>, <code>inner_sock</code> is
+the property name for the luasocket on all of the cosock sockets. If the
+first return from that function is <code>nil</code> we check to see if the second
+return value can be found in <code>receivemethods</code> or <code>sendmethods</code>,
+if so we know that we need to yield, so we check if <code>blocked</code>
+is defined and call that if it is, again overwriting <code>inputparams</code>
+with the return value.</p>
+<p>Now we determine what <code>kind</code> of yield we are going to do, if the second
+return was found in <code>receivemethods</code> it would be <code>&quot;recvr&quot;</code> if it was
+found in <code>sendmethods</code> it would be <code>&quot;sendr&quot;</code>. Now we set up our arguments
+for <code>coroutine.yield</code> putting <code>self</code> into <code>recvt</code> if our <code>kind</code> is <code>&quot;recvr&quot;</code>
+or into <code>sendt</code> if our <code>kind</code> is <code>&quot;sendr&quot;</code>. Now we can call <code>coroutine.yield(sendt, recvt, self.timeout)</code> assigning the returns there to <code>recvr, sendr, rterr</code>. If <code>rterr</code> is not <code>nil</code>, we are going to return early, if its
+value matches the error from our method call (i.e. &quot;timeout&quot; for both) then
+we return the values from our call to that method.</p>
+<p>The last thing we do in this case before heading back to the top of the loop
+is to assert our kind and the result of <code>cosock.socket.select</code> match, meaning we have
+a <code>kind</code> of <code>&quot;sendr&quot;</code>, the <code>sendr</code> variable is populated, and the <code>recvr</code> variable is unpopulated;
+or vice versa.</p>
+<hr />
+<p>If the first return argument to our method call was not <code>nil</code> then we
+can exit early transforming the return value with <code>output</code> if that is
+populated.</p>
+<p>The only other function provided by <code>cosock.socket.internals</code> is
+<code>setuprealsocketwaker</code> which completes the wrapping of our cosock socket.</p>
+<p>This function takes the socket table and an optional list of <code>kinds</code>, if
+<code>kinds</code> is not provided then the default will be both <code>sendr</code> and <code>recvr</code>.</p>
+<p>We then define a method on <code>socket</code> called <code>setwaker</code> which is used
+by cosock to wake up sleeping coroutines
+(<a href="./07-setwaker.html">see the integrating chapter</a> for more info).
+This <code>setwaker</code> will assign the provided <code>waker</code> function to
+a <code>self.wakers</code> table based on the <code>kind</code> of <code>waker</code>. It also defines
+a method <code>_wake</code> which takes an argument <code>kind</code> and varargs for any
+additional arguments. This method will see if <code>self.wakers[kind]</code> is
+not <code>nil</code> and if so call that with the varargs. It then replaces
+<code>self.wakers[kind]</code> with <code>nil</code>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="run-1"><a class="header" href="#run-1">Run</a></h1>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        <script type="text/javascript">
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+    </body>
+</html>

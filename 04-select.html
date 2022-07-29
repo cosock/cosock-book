@@ -1,0 +1,396 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Select - Cosock</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="01-cosock.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="01.1-getting-started.html"><strong aria-hidden="true">1.1.</strong> Getting Started</a></li></ol></li><li class="chapter-item expanded "><a href="02-spawn.html"><strong aria-hidden="true">2.</strong> Spawn</a></li><li class="chapter-item expanded "><a href="03-channels.html"><strong aria-hidden="true">3.</strong> Channels</a></li><li class="chapter-item expanded "><a href="04-select.html" class="active"><strong aria-hidden="true">4.</strong> Select</a></li><li class="chapter-item expanded "><a href="05.0-setwaker.html"><strong aria-hidden="true">5.</strong> Integrating with Cosock</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="05.1-bounded-channel.html"><strong aria-hidden="true">5.1.</strong> Bounded Channel: Shared</a></li><li class="chapter-item expanded "><a href="05.2-bounded-recvr.html"><strong aria-hidden="true">5.2.</strong> Bounded Channel: Recvr</a></li><li class="chapter-item expanded "><a href="05.3-bounded-sendr.html"><strong aria-hidden="true">5.3.</strong> Bounded Channel: Sendr</a></li><li class="chapter-item expanded "><a href="05.4-bounded-final.html"><strong aria-hidden="true">5.4.</strong> Bounded Channel: Finish</a></li><li class="chapter-item expanded "><a href="05.5-bounded-limits.html"><strong aria-hidden="true">5.5.</strong> Bounded Channel: Limitations</a></li></ol></li><li class="chapter-item expanded "><a href="06.0-advanced.html"><strong aria-hidden="true">6.</strong> Advanced</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="06.1-internals.html"><strong aria-hidden="true">6.1.</strong> Internals</a></li><li class="chapter-item expanded "><a href="06.2-run.html"><strong aria-hidden="true">6.2.</strong> Run</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Cosock</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/cosock/cosock-book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/cosock/cosock-book/edit/main/src/04-select.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="select"><a class="header" href="#select">Select</a></h1>
+<p>Now that we have covered how to spawn and run coroutines using cosock, let's talk about how we
+could handle multiple IO sources in a single coroutine. For this kind of work, cosock provides
+<code>cosock.socket.select</code>, this function works in a very similar way to luasocket's <code>socket.select</code>,
+to call it would look something like <code>local recvr, sendr, err = cosock.socket.select(recvt, sendt, timeout)</code>
+its arguments are</p>
+<ul>
+<li><code>recvt</code>: This is a list of cosock sockets that are waiting to be ready to <code>receive</code></li>
+<li><code>sendt</code>: This is a list of cosock sockets that are waiting to be ready to <code>send</code></li>
+<li><code>timeout</code>: This is the maximum amount of seconds to wait for one or more entries in <code>recvt</code> or <code>sendt</code> to be ready
+<ul>
+<li>If this value is <code>nil</code> or negative it will treat the timeout as infinity</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>Note: The list entries for <code>sendt</code> and <code>recvt</code> can be other &quot;cosock aware&quot; tables like the
+<a href="https://github.com/cosock/lustre">lustre WebSocket</a>, for specifics on how to make a table &quot;cosock aware&quot; 
+<a href="07-setwaker.html">see the chapter on it</a></p>
+</blockquote>
+<p>Its return values are</p>
+<ul>
+<li><code>recvr</code>: A list of ready receivers, any entry here should be free to call <code>receive</code> and
+immediately be ready</li>
+<li><code>sendr</code>: A list of ready senders, any entry here should be free to call <code>send</code> and immediately be
+ready</li>
+<li><code>err</code>: If this value is not <code>nil</code> it represents an error message
+<ul>
+<li>The most common error message here would be <code>&quot;timeout&quot;</code> if the <code>timeout</code> argument provided
+is not <code>nil</code> and positive</li>
+</ul>
+</li>
+</ul>
+<p>So, how would we use something like this? Let's consider our <code>clients_server.lua</code> example
+from the <a href="./02-spawn.html">spawn chapter</a>, where we called <code>cosock.spawn</code> every time a new
+client was <code>accept</code>ed, this works but we don't have much control over how many tasks we end
+up spawning. In large part, this is because we don't know how long each task will run. To achieve
+this, we would need to be able to handle all of the client connections on the same task as the
+server and to do that, we can use <code>select</code>.</p>
+<pre><code class="language-lua">-- clients_server_select.lua
+local cosock = require &quot;cosock&quot;
+local socket = require &quot;cosock.socket&quot;
+local ip = &quot;0.0.0.0&quot;
+
+local number_of_clients = 10
+
+--- Since the clients and server are in the same application
+--- we can use an OS assigned port and share it across the
+--- two tasks, to coordinate the two tasks to start in the order
+--- we want, we can use a cosock channel to make sure both tasks
+--- have the same port number
+local port_tx, port_rx = cosock.channel.new()
+
+--- Handle a client being ready to receive
+--- @param client cosock.socket.tcp
+--- @return integer|nil @1 if successful
+--- @return nil|string @nil if successful, error message if not
+function handle_recv(client, clients)
+  local request, err = client:receive()
+  if not request then
+    if err == &quot;closed&quot; then
+      clients[client] = nil
+    end
+    return
+  end
+  print(string.format(&quot;received %q&quot;, request))
+  if request:match(&quot;ping&quot;) then
+    print(&quot;sending pong&quot;)
+    local s, err = client:send(&quot;pong\n&quot;)
+    if err == &quot;closed&quot; then
+      clients[client] = nil
+    elseif err then
+      print(&quot;error in recv: &quot; .. tostring(err))
+    end
+  else
+    client:close()
+    clients[client] = nil
+  end
+end
+
+--- Handle a server being ready to accept
+--- @param server cosock.socket.tcp
+--- @return cosock.socket.tcp|nil
+--- @return nil|string @nil if successful, error message if not
+function handle_accept(server, clients)
+  local client, err = server:accept()
+  if err and err ~= &quot;timeout&quot; then
+    error(&quot;error in accept: &quot; .. tostring(err))
+  end
+  if client then
+    clients[client] = true
+  end
+end
+
+--- Spawn a task for handling the server side of the socket
+cosock.spawn(function()
+  local server = socket.tcp()
+  server:bind(ip, 0)
+  local _ip, p = server:getsockname()
+  port_tx:send(p)
+  server:listen()
+  local clients = {}
+  server:settimeout(0)
+  while true do
+    local recvt = {}
+    for client, _ in pairs(clients) do
+      table.insert(recvt, client)
+    end
+    if #recvt &lt; 5 then
+      table.insert(recvt, server)
+    end
+    local recvr, _sendr, err = cosock.socket.select(recvt, {}, 5)
+    if err == &quot;timeout&quot; then
+      return
+    elseif err then
+      error(&quot;Error in select: &quot;..tostring(err))
+    end
+
+    for _, sock in ipairs(recvr) do
+      if sock == server then
+        print(&quot;accepting new client&quot;)
+        handle_accept(server, clients)
+      elseif clients[sock] then
+        handle_recv(sock, clients)
+      end
+    end
+  end
+end, &quot;server task&quot;)
+
+--- A single client task
+---@param id integer The task's identifier
+---@param port integer The server's port number
+local function spawn_client(id, port)
+  print(&quot;spawn_client&quot;, id, port)
+  local client = socket.tcp()
+  client:connect(ip, port)
+  for _=1,10 do    
+    print(&quot;sending ping&quot;, id)
+    client:send(string.format(&quot;ping %s\n&quot;, id))
+    local request = assert(client:receive())
+    assert(request == &quot;pong&quot;)
+    socket.sleep(0.5)
+  end
+  client:close()
+end
+
+--- Wait for the port from the server task and then
+--- spawn the `number_of_clients` client tasks
+local function spawn_clients()
+  local port = assert(port_rx:receive())
+  for i=1,number_of_clients do
+    cosock.spawn(function()
+      spawn_client(i, port)
+    end, string.format(&quot;client-task-%s&quot;, i))
+  end
+end
+
+--- Spawn a bunch of client tasks
+cosock.spawn(function()
+  spawn_clients()
+end, &quot;clients task&quot;)
+
+--- Finally we tell cosock to run all our coroutines until they are done
+--- which should be forever
+cosock.run()
+</code></pre>
+<p>The above is an updated version of our
+<a href="./02-spawn.html#clientsserver-example">clients/server example</a> with some updates to limit
+the total number of connections to 5, let's go over the changes.</p>
+<p>First, we've added a few helper functions to handle the different events in our system,
+the first is for when a client connection is ready to receive <code>handle_recv</code> takes 2 arguments,
+<code>client</code> which is a <code>cosock.socket.tcp</code> that was returned from a call
+to <code>accept</code> and <code>clients</code> which is a table where the keys are <code>cosock.socket.tcp</code> clients
+and the values are <code>true</code>. We first call <code>client:receive</code> to get the bytes from
+the client and if that returns a string that contains <code>&quot;ping&quot;</code> then we send our
+<code>&quot;pong&quot;</code> message. There are few places where this can go wrong, the call to <code>receive</code>
+could return <code>nil</code> and an error message or not <code>&quot;ping&quot;</code> or the call to <code>send</code> could
+return <code>nil</code> and an error message; if the error message is <code>&quot;closed&quot;</code> or the request
+didn't contain <code>&quot;ping&quot;</code> then we want to remove <code>client</code> from <code>clients</code> and if it was
+the latter then we want to call <code>client:close</code>.</p>
+<p>Next up we have <code>handle_accept</code> this also takes 2 arguments <code>server</code> which is a 
+<code>cosock.socket.tcp</code> socket that is listening and the same map of <code>clients</code>. If a
+call to <code>accept</code> returns a <code>client</code> then we add that <code>client</code> into our <code>clients</code> map.
+If <code>accept</code> returns <code>nil</code> and <code>err</code> isn't <code>&quot;timeout&quot;</code> then we raise an error.</p>
+<p>Alright, with these two helper functions we can now update the <code>&quot;server&quot;</code> task to
+handle all of the connected clients w/o having to call <code>spawn</code>. Our tasks starts
+out the same as before, creating a <code>server</code> socket, binding it to a random port,
+gets that port and sends it to our <code>&quot;clients task&quot;</code> and then calls <code>listen</code>.
+At this point, things start to change, first we define our <code>clients</code> map as
+empty we then use <code>handle_accept</code> to accept the first connection and then call
+<code>server:settimeout(0)</code> to avoid a potential server that will yield forever. </p>
+<p>Inside of our long-running loop, we start out by defining a new table <code>recvt</code> which
+will match the argument to <code>select</code> which has the same name. We then loop over our
+<code>clients</code> table, inserting any of the keys into <code>recvt</code>. We keep these as separate
+tables because we want to be able to remove a <code>client</code> from our readiness check
+once it has closed. Next, we check to see how large <code>recvt</code> is, if it is below 5
+we add <code>server</code> into it. By only including <code>server</code> when <code>recvt</code> has fewer than
+5 clients we have enforced our max connections limit.</p>
+<p>With <code>recvt</code> defined we can finally call <code>cosock.socket.select</code>, we use <code>recvt</code> as
+the first argument, an empty table as the <code>sendt</code> argument and finally a timeout of 5 seconds.
+We assign the result of <code>select</code> into <code>recvr, _sendr, err</code>, we would expect that
+<code>recvr</code> would contain any of our <code>clients</code> that are ready to <code>receive</code> and, if
+we are below the limit, <code>server</code>. If <code>recvr</code> is <code>nil</code> we would expect <code>err</code> to be
+the string describing that error. If <code>err</code> is <code>&quot;timeout&quot;</code> then we exit our server
+task which should exit the application. If we don't have an <code>err</code> then we loop over
+all the <code>recvr</code>s and check to see if they are our <code>server</code>, if so we call
+<code>handle_accept</code> if not then we call <code>handle_recv</code>. Each of our helpers will update
+the <code>clients</code> map to ensure that we service all of the client requests before exiting.</p>
+<p>The last change we've made is to <code>spawn_client</code> which previously would loop forever,
+it now loops 10 times before exiting and closing the <code>client</code>.</p>
+<p>If we were to run this you would see each of the tasks spawn in a random order and
+the first 5 of those would begin sending their <code>&quot;ping&quot;</code> messages. Once 1 of them
+completes, we would accept the next connection but not before that point which means
+we have limited our total number of connected clients to 5!</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="03-channels.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="05.0-setwaker.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="03-channels.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="05.0-setwaker.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>
