@@ -140,7 +140,231 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="run"><a class="header" href="#run">Run</a></h1>
+                        <h1 id="advanced-overview-of-cosockrun"><a class="header" href="#advanced-overview-of-cosockrun">Advanced Overview of <code>cosock.run</code></a></h1>
+<h2 id="global-variables"><a class="header" href="#global-variables">Global Variables</a></h2>
+<p>Cosock utilized a few global variables to allow for the potentially recursive nature of lua coroutines.</p>
+<ul>
+<li><code>threads</code>: List of all coroutines cosock is aware of
+<ul>
+<li>This is populated by the first argument to <code>cosock.spawn</code></li>
+</ul>
+</li>
+<li><code>threadnames</code>: A map of coroutine&lt;-&gt;name pairs
+<ul>
+<li>This is populated by the second argument ot <code>cosock.spawn</code></li>
+</ul>
+</li>
+<li><code>threadswaitingfor</code>: A map of coroutine&lt;-&gt;select args
+<ul>
+<li>Select args have the type <code>{recvr: table&lt;cosock.socket&gt;, sendr: table&lt;cosock.socket&gt;, timeout: float?}</code></li>
+<li>This populated by the values provided to <code>coroutine.yield</code> for cosock tasks from a call to <code>cosock.socket.select</code></li>
+</ul>
+</li>
+<li><code>readythreads</code>: A map of coroutine&lt;-&gt;resume args that will be ready on the next pass
+<ul>
+<li>Resume args have the type <code>{recvr = table&lt;cosock.socket&gt;, sendr = table&lt;cosock.socket&gt;, err: string?}</code></li>
+<li>This is populated by coroutine wake-ups that occur on the current pass</li>
+</ul>
+</li>
+<li><code>socketwrappermap</code>: A map of luasocket&lt;-&gt;cosock socket pairs
+<ul>
+<li>This map is keyed with the table pointer for the luasocket for easily getting back to a cosock socket when you
+only have a luasocket</li>
+<li>This gets populated when a cosock socket is included in a select args table</li>
+</ul>
+</li>
+<li><code>threaderrorhandler</code>: Potential error handler function. Not currently settable.</li>
+<li><code>timers</code>: <a href="#timers">see Timers</a></li>
+</ul>
+<h2 id="run-loop"><a class="header" href="#run-loop">Run Loop</a></h2>
+<p>To start the loop we define a few local variables. First up is <code>wakethreads</code>, This table will be
+populated by removing all of the elements from <code>readythreads</code>, which frees up <code>readythreads</code> to
+be added to by any tasks we are about to wake up. Next are the two list tables <code>sendt</code> and <code>recvt</code>
+along with the optional integer <code>timeout</code>, these will end up being passed to luasocket's <code>socket.select</code>
+when we run out of ready threads. Now we can move all our <code>readythreads</code> into <code>wakethreads</code> and then
+loop over all of the ready threads.</p>
+<p>For each ready thread, we first check if the <code>coroutine.status</code> for it is <code>&quot;suspended&quot;</code>, if it isn't we
+will skip this thread. For any <code>&quot;suspended&quot;</code> thread, we first cancel any timers that might be scheduled
+for that thread by calling <code>timers.cancel</code>. Next we pull out the values we stored in <code>threadswaitingfor</code>
+and call <code>skt:setwaker</code> with <code>nil</code> for any <code>sendr</code> or <code>recvr</code> properties, this will prevent any potential
+&quot;double wakes&quot; from occurring.</p>
+<p>Now we call <code>coroutine.resume</code> with our <code>thread</code>, and the <code>recvr</code>, <code>sendr</code> and <code>err</code> values that were stored
+in <code>wakethreads</code>. When <code>coroutine.resume</code> completes, we have 2 pieces of information that drive our next path.
+The first return value from <code>coroutine.resume</code> will indicate if our <code>thread</code> raised an error or not, the second
+is that we call <code>coroutine.status</code> on our <code>thread</code>. If our <code>thread</code>'s status is <code>&quot;dead&quot;</code> and <code>coroutine.resume</code>
+returned <code>false</code>, something has gone terribly wrong so we raise an error (with a traceback if <code>debug</code> is available).
+If our <code>thread</code>'s status is <code>&quot;dead&quot;</code> and <code>coroutine.resume</code> returned <code>true</code>, we just remove our <code>thread</code> from <code>threads</code>
+and <code>threadswaitingfor</code>. If our <code>thread</code>'s status is <code>&quot;suspended&quot;</code> and <code>coroutine.resume</code> returned <code>true</code> then we first
+update <code>threadswaitingfor</code> with the remaining return values from <code>coroutine.resume</code>. We also then call <code>skt:setwaker</code>
+for any <code>sendr</code> and <code>recvr</code> in those values to a function that will clear itself and call the local function
+<code>wake_thread</code>. At this point we also update our local tables <code>recvt</code> and <code>sendt</code>, to include the <code>skt.inner_sock</code>
+values from <code>threadswaitingfor</code> which are the <code>luasocket</code>s associated with a <code>cosock.socket</code>.</p>
+<p>Now that we have resumed all of the <code>wakethreads</code> and filled in our eventual arguments to <code>socket.select</code>, we then
+determine if we are still <code>running</code>, we do this by looping over all of our <code>threads</code> and checking that at least 1 has
+a <code>coroutine.status</code> that is not <code>&quot;dead&quot;</code>. If all <code>threads</code> are <code>&quot;dead&quot;</code> and nothing got added to <code>readythreads</code> then
+we exit the run loop. Next we update our <code>socketwrappermap</code> by looping over all of the values in <code>threadswaitingfor</code>
+and insert each <code>recvr</code> and <code>sendr</code> into the key of <code>skt.inner_sock</code>.</p>
+<p>With all the bookkeeping done, we run all of the <code>timers</code> that have reached their deadline, and update our
+local variable <code>timeout</code> to the duration until the shortest remaining timeout. If at least one thread was added to
+<code>readythreads</code>, we set our timeout to 0, because we already know we have new work to do. At this point if <code>timeout</code> is
+<code>nil</code> and both <code>sendt</code> and <code>recvt</code> are empty, we raise an error because we are about to call
+<code>socket.select({}, {}, nil)</code> which would just block forever. At this point, we call <code>socket.select</code> capturing the
+values in <code>recvr</code>, <code>sendr</code> and <code>err</code>. If <code>err</code> isn't the value <code>&quot;timeout&quot;</code>, we raise that error. If <code>err</code> is <code>nil</code>
+or <code>&quot;timeout&quot;</code>, we loop over all of the values in <code>recvr</code> and <code>sendr</code>, looking up the cosock socket in
+<code>socketwrappermap</code> and calling <code>skt:_wake</code> which would call the function we provided to <code>setwaker</code> above.</p>
+<p>With that complete, we now have a fully updated <code>readythreads</code> and we start the loop again.</p>
+<details>
+<summary>Outline Version</summary>
+<ol>
+<li>Define <code>wakethreads</code></li>
+<li>Define an empty list of senders (<code>sendt</code>), receivers (<code>recvt</code>) and a <code>timeout</code></li>
+<li>Pop all <code>readythreads</code> entries into the <code>wakethreads</code></li>
+<li>Loop over all threads in <code>wakethreads</code>
+<ol>
+<li>If <code>coroutine.status</code> for that thread returns &quot;suspended&quot;
+<ol>
+<li>Clear any timers</li>
+<li>Clear any wakers registered with a <code>timeout</code></li>
+<li><code>coroutine.resume</code> with the stored <code>recv4</code>, <code>sendr</code> and <code>err</code> arguments</li>
+<li>If <code>coroutine.resume</code> returned <code>true</code> in the first position and <code>coroutine.status</code> returns &quot;suspended&quot;
+<ol>
+<li>Re-populate <code>threadswaitingfor[thread]</code> with the 3 other return values from <code>coroutine.resume</code>
+<ol>
+<li>These should be the <code>recvt</code>, <code>sendt</code> and <code>timeout</code> values that will populate select args</li>
+</ol>
+</li>
+<li>Set the waker for all sockets in <code>recvt</code> and <code>sendt</code> to call <code>wake_thread</code> and then unset themselves</li>
+<li>If <code>coroutine.resume</code> returned a <code>timeout</code>, create a new timer for this thread which will call <code>wake_thread_err</code> on expirations with the value &quot;timeout&quot;</li>
+</ol>
+</li>
+<li>if <code>coroutine.status</code> returned &quot;dead&quot;
+<ol>
+<li>If <code>coroutine.resume</code> returned <code>false</code> in the first position and no <code>threaderrorhandler</code> has been set
+<ol>
+<li>Raise an error
+<ol>
+<li>If the <code>debug</code> library is available, include a <code>debug.traceback</code> and the second return value from <code>cosock.resume</code></li>
+<li>Else just raise an error with the second return value from <code>cosock.resume</code></li>
+</ol>
+</li>
+<li>Exit the application
+<ol>
+<li>This calls <code>os.exit(-1)</code></li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>Else, print a warning message if printing is turned on</li>
+</ol>
+</li>
+<li>Initialize a variable <code>running</code> to <code>false</code></li>
+<li>Loop over all <code>threads</code>, calling <code>coroutine.status</code> on each, if at least 1 doesn't return &quot;dead&quot;, set <code>running</code> to <code>true</code></li>
+<li>If <code>running</code> is <code>false</code> and <code>readythreads</code> is empty
+<ol>
+<li>Exit the run loop</li>
+</ol>
+</li>
+<li>Loop over all the values in <code>threadswaitingfor</code>
+<ol>
+<li>Insert the luasockets on any <code>sendr</code> or <code>recvr</code> parameters to the loop local variables <code>sendt</code> and <code>recvt</code></li>
+<li>Populate <code>socketwrappermap</code> with any <code>sendr</code> or <code>recvr</code>s</li>
+</ol>
+</li>
+<li>Call <code>timers.run</code></li>
+<li>If <code>readythreads</code> is not empty
+<ol>
+<li>Set <code>timeout</code> to <code>0</code></li>
+</ol>
+</li>
+<li>If <code>timeout</code> is falsy and <code>recvt</code> is empty and <code>sendt</code> is empty
+<ol>
+<li>Raise an error that cosock.select was called with no sockets and no timeouts</li>
+</ol>
+</li>
+<li>Call luasocket's <code>socket.select</code> with our loops <code>recvt</code>, <code>sendt</code> and <code>timeout</code></li>
+<li>If <code>socket.select</code> returns a value in the 3rd position and that value is not <code>&quot;timeout&quot;</code>
+<ol>
+<li>Raise an error with that return value</li>
+</ol>
+</li>
+<li>Loop over the <code>recvr</code> (1st) return from <code>socket.select</code>
+<ol>
+<li>Look up the <code>cosock.socket</code> from <code>socketwrappermap</code></li>
+<li>Call <code>skt:_wake(&quot;recvr&quot;)</code></li>
+</ol>
+</li>
+<li>Loop over the <code>sendr</code> (2nd) return from <code>socket.select</code>
+<ol>
+<li>Look up the <code>cosock.socket</code> from <code>socketwrappermap</code></li>
+<li>Call <code>skt:_wake(&quot;sendr&quot;)</code></li>
+</ol>
+</li>
+</ol>
+</details>
+<h2 id="timers"><a class="header" href="#timers">Timers</a></h2>
+<p>Internally, we keep a list of <code>timer</code> objects to determine when any <code>thread</code> would have reached the maximum time
+it should be running/yielding for. We can interact with these through a module local variable <code>timers</code> which
+has a few associated functions.</p>
+<p>Inside of a <code>do</code> block, we create 2 local variables <code>timeouts</code> and <code>refs</code> for use in the <code>timer</code> associated functions.</p>
+<p>The first associated function worth discussing is <code>timers.set</code>, which takes the arguments <code>timeout: float</code>,
+<code>callback: fun()</code> and <code>ref: table</code>. When called, we first capture the current timestamp via <code>socket.gettime()</code>,
+we then calculate the deadline for this timer by adding <code>timeout</code> to that timestamps into a variable <code>timeoutat</code>.
+We then <code>table.insert</code> the the table <code>{ timeoutat = timeoutat, callback = callback, ref = ref }</code> into <code>timeouts</code>.
+If <code>ref</code> isn't <code>nil</code> we also populate <code>refs[ref]</code> with that same table.</p>
+<p>Next up is <code>timers.cancel</code> which takes the arguments <code>ref: table</code>. When called, we first lookup the timeout info
+from <code>refs[ref]</code>, if we find something there we remove the values in the properties <code>callback</code> and <code>ref</code> and finally
+we remove the value from <code>refs</code>. By removing the <code>callback</code> we avoid ever calling the consequence of that timer.
+Eventually it will be removed from <code>timeouts</code> in the next call to <code>run</code>.</p>
+<p>Finally we have <code>timers.run</code> this function takes no arguments. When called, it first sorts the <code>timeouts</code> table in
+ascending order by <code>timeoutat</code>, where <code>nil</code> values are the smallest values. We then capture the current timestamp
+by calling <code>socket.gettime</code>. Now we consult the first element of <code>timeouts</code>, if that table as a <code>timeoutat</code> of <code>nil</code>
+or is less than now, we pop it off list, if it has a <code>callback</code> property we call that, if it has a <code>ref</code> property
+we remove it from <code>refs</code>.</p>
+<p>Now that all the pending timers are done, we use the new first element of <code>timeouts</code>' <code>timeoutat</code> property to calculate
+the next relative timeout (<code>timeoutat - now</code>) and return that as the earliest timeout. If <code>timeouts</code> is empty, we return
+<code>nil</code>.</p>
+<details>
+<summary>Outline Version</summary>
+<ul>
+<li>A timer has the shape <code>{timeoutat: float, callback: fun(), ref: table?}</code>
+<ul>
+<li><code>timers.set</code>
+<ul>
+<li>Updates <code>timers</code> to include that value. Also updates a private scoped table named <code>refs</code>
+<ul>
+<li><code>refs</code> is a map of table pointer&lt;-&gt;timer which is used for cancellation of a timer</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>timers.cancel</code>
+<ul>
+<li>If the provided table pointer is in <code>refs</code>, remove the <code>callback</code> and <code>ref</code> properties from that table</li>
+<li>Set the table pointer key in <code>refs</code> to <code>nil</code></li>
+</ul>
+</li>
+<li><code>timers.run</code>
+<ul>
+<li>Sort all timeouts by deadline (earliest first)</li>
+<li>Pop the timer off the front of the <code>timers</code> list</li>
+<li>If that <code>timer.timeoutat</code> is <code>nil</code> or <code>&lt; socket.gettime()</code>
+<ul>
+<li>Call <code>timer.callback</code></li>
+<li>remove this <code>timer</code> from <code>refs</code></li>
+</ul>
+</li>
+<li>If there are any more timeouts left, return how long before that timeout should expire</li>
+<li>If there are no more timeouts, return <code>nil</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</details>
 
                     </main>
 
